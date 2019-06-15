@@ -1,5 +1,6 @@
 package com.dzyun.matches.dto;
 
+import java.io.Serializable;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -7,12 +8,9 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class RowEntity {
+public class RowEntity implements Serializable {
 
-  //rowkey
   private String rowKey;
-  //数据
   private String col;
-
   private String value;
 }

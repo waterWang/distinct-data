@@ -63,8 +63,8 @@ object SparkStreaming {
         val puts: java.util.List[RowEntity] = null
         if (!HBaseClient.existsRowKey(tableName, rowKey)) {
           log.info("insert line=" + line)
-          val bean = new RowEntity(rowKey, colName, filename)
-          puts.add(bean)
+//          val bean = new RowEntity(rowKey, colName, filename)
+//          puts.add(bean)
           //HBaseClient.insert(tableName, rowKey, colName, colName, filename)
         } else {
           log.error("not insert filename=" + filename + " line=" + line)
