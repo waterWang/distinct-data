@@ -1,11 +1,12 @@
 package com.dzyun.matches.streaming
 
 import java.io.File
+import java.text.SimpleDateFormat
 
-import com.dzyun.matches.dto.RowEntity
+import com.dzyun.matches.dto.{MsgEntity, RowEntity}
 import com.dzyun.matches.hbase.HBaseClient
 import com.dzyun.matches.hive.HiveClient
-import com.dzyun.matches.util.ShaUtils
+import com.dzyun.matches.util.{DateUtils, ShaUtils}
 import org.apache.hadoop.io.{LongWritable, Text}
 import org.apache.hadoop.mapreduce.lib.input.TextInputFormat
 import org.apache.spark.SparkConf
@@ -19,8 +20,9 @@ import scala.reflect.ClassTag
 object SparkStreaming {
 
   private val log = LoggerFactory.getLogger(SparkStreaming.getClass)
-  private val tableName = "ns:distinct_msg_test"
   private val colName = "file_no"
+  private val line_regex = "\t"
+  private val file_name_regex = "\\."
 
   def namedTextFileStream(ssc: StreamingContext, dir: String): DStream[String] =
     ssc.fileStream[LongWritable, Text, TextInputFormat](dir)
@@ -56,24 +58,29 @@ object SparkStreaming {
     val data = dStream.transform(rdd => transformByFile(rdd, byFileTransformer))
     data.print()
     data.foreachRDD(rdd => {
+      val hives: java.util.List[MsgEntity] = null
+      val hbases: java.util.List[RowEntity] = null
       rdd.foreach(s => {
-        val filename = s._1.split("\\.")(0)
+        val filename = s._1.split(file_name_regex)(0)
         val line = s._2
-        val rowKey = ShaUtils.encrypt(line.split("\t"))
-        val puts: java.util.List[RowEntity] = null
-        if (!HBaseClient.existsRowKey(tableName, rowKey)) {
+        val arr = line.split(line_regex)
+        val rowKey = ShaUtils.encrypt(arr(0), arr(1), arr(3), arr(4))
+        if (!HBaseClient.existsRowKey(rowKey)) {
           log.info("insert line=" + line)
-//          val bean = new RowEntity(rowKey, colName, filename)
-//          puts.add(bean)
+          val hiveBean = new MsgEntity(arr(0), arr(1).toLong, arr(2), arr(3), arr(4),
+            DateUtils.format(arr(1)), filename)
+          val hbaseBean = new RowEntity(rowKey, colName, filename)
+          hives.add(hiveBean)
+          hbases.add(hbaseBean)
           //HBaseClient.insert(tableName, rowKey, colName, colName, filename)
         } else {
           log.error("not insert filename=" + filename + " line=" + line)
         }
-        if (!puts.isEmpty) {
-          HBaseClient.batchAddRow(tableName, colName, puts)
-//          HiveClient.add()
-        }
       })
+      if (!hbases.isEmpty) {
+        HBaseClient.batchAdd(hbases)
+        HiveClient.batchAdd(hives)
+      }
     })
     ssc.start()
     ssc.awaitTermination()

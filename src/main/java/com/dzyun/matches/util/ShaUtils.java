@@ -30,7 +30,7 @@ public class ShaUtils {
     return hexString.toString();
   }
 
-  private static String strFormat(String s1, String s2, String s3, String s4) {
+  public static String encrypt(String s1, String s2, String s3, String s4) {
     StringBuilder sb = new StringBuilder();
     sb.append(s1);
     sb.append(s2);
@@ -41,7 +41,7 @@ public class ShaUtils {
 
   public static String encrypt(String[] arr) {
     //phoneNo,createTime,mailCallNo,msg
-    return evaluate(strFormat(arr[0], arr[1], arr[3], arr[4]));
+    return evaluate(encrypt(arr[0], arr[1], arr[3], arr[4]));
   }
 
 

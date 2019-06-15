@@ -43,6 +43,8 @@ public class HBaseClient {
   private static Configuration conf = null;
   private static Connection conn = null;
   private static Admin admin = null;
+  private static String tableName = "ns:distinct_msg_test";
+  private static String colName = "file_no";
 
 
   static {
@@ -59,12 +61,19 @@ public class HBaseClient {
 
 
   public static void main(String[] args) {
+
+    List<RowEntity> rows = new ArrayList<>();
+    for (int i = 0; i < 10; i++) {
+      rows.add(new RowEntity("rowKey" + i, colName, "value" + i));
+    }
+
     try {
 //      hBaseClient.insert(tableName, "qwertyupoiuyt", "file_no", "file_no", "L120190606_123");
 //      LabelResult res = hBaseClient.getRowData(tableName, "qwertyupoiuyt1", "file_no");
 //      System.out.println(res.getEntityList().get(0).toString());
-      System.out
-          .println(existsRowKey("ns:distinct_msg", "c63198986baad0381569e3be4fbcfb4e12b9a050"));
+      
+      batchAdd(rows);
+      System.out.println(existsRowKey("rowKey5"));
     } catch (Exception e) {
       e.printStackTrace();
     }
@@ -284,7 +293,7 @@ public class HBaseClient {
       table.put(list);
     }
   }*/
-  public static void batchAddRow(String tableName, String colFamily, List<RowEntity> rows)
+  public static void batchAdd(String tableName, String colFamily, List<RowEntity> rows)
       throws IOException {
     if (StringUtils.isEmpty(colFamily)) {
       colFamily = ConstUtil.COLUMNFAMILY_DEFAULT;
@@ -300,6 +309,11 @@ public class HBaseClient {
       }
       table.put(puts);
     }
+  }
+
+  public static void batchAdd(List<RowEntity> rows)
+      throws IOException {
+    batchAdd(tableName, colName, rows);
   }
 
   /**
@@ -389,6 +403,10 @@ public class HBaseClient {
       return false;
     }
     return result.getExists();
+  }
+
+  public static Boolean existsRowKey(String rowKey) {
+    return existsRowKey(tableName, rowKey);
   }
 
   /**
