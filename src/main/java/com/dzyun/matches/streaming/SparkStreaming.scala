@@ -67,9 +67,20 @@ object SparkStreaming {
         val rowKey = ShaUtils.encrypt(arr(0), arr(1), arr(3), arr(4))
         if (!HBaseClient.existsRowKey(rowKey)) {
           log.info("insert line=" + line)
-          val hiveBean = new MsgEntity(arr(0), arr(1).toLong, arr(2), arr(3), arr(4),
-            DateUtils.format(arr(1)), filename)
-          val hbaseBean = new RowEntity(rowKey, colName, filename)
+          val hiveBean = new MsgEntity()
+
+          hiveBean.setPhone_id(arr(0))
+          hiveBean.setCreate_time(arr(1).toLong)
+          hiveBean.setApp_name(arr(2))
+          hiveBean.setMain_call_no(arr(3))
+          hiveBean.setMsg(arr(4))
+          hiveBean.setThe_date(DateUtils.format(arr(1)))
+          hiveBean.setFile_no(filename)
+
+          val hbaseBean = new RowEntity()
+          hbaseBean.setRowKey(rowKey)
+          hbaseBean.setCol(colName)
+          hbaseBean.setValue(filename)
           hives.add(hiveBean)
           hbases.add(hbaseBean)
           //HBaseClient.insert(tableName, rowKey, colName, colName, filename)
