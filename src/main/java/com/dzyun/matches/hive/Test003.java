@@ -15,7 +15,6 @@ public class Test003 {
         .master("yarn")
         .enableHiveSupport()
         .getOrCreate();
-//    spark.sql("show databases").show();
     List<MsgEntity> msgs = new ArrayList<>();
     for (int i = 0; i < 10; i++) {
       MsgEntity bean = new MsgEntity("861832882276" + i, 156000878L + i,
@@ -25,7 +24,7 @@ public class Test003 {
     }
     Dataset ds = spark.createDataFrame(msgs, MsgEntity.class).toDF("phone_id", "create_time",
         "app_name", "main_call_no", "msg", "the_date", "file_no");
-    ds.write().mode("append").format("Hive").partitionBy("the_date","file_no").saveAsTable("tmp.tmp_msg_www_0630");
+    ds.write().mode("append").format("Hive").option("hive.exec.dynamic.partition.mode","nonstrict").partitionBy("the_date","file_no").saveAsTable("tmp.tmp_msg_www_0630");
     ds.show();
   }
 }
