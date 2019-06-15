@@ -2,7 +2,9 @@ package com.dzyun.matches.streaming
 
 import java.io.File
 
-import com.dzyun.matches.hbase.JavaHBaseClient
+import com.dzyun.matches.dto.RowEntity
+import com.dzyun.matches.hbase.HBaseClient
+import com.dzyun.matches.hive.HiveClient
 import com.dzyun.matches.util.ShaUtils
 import org.apache.hadoop.io.{LongWritable, Text}
 import org.apache.hadoop.mapreduce.lib.input.TextInputFormat
@@ -10,15 +12,15 @@ import org.apache.spark.SparkConf
 import org.apache.spark.rdd.{RDD, UnionRDD}
 import org.apache.spark.streaming.{Seconds, StreamingContext}
 import org.apache.spark.streaming.dstream.DStream
-import org.apache.spark.internal.Logging
+import org.slf4j.LoggerFactory
 
 import scala.reflect.ClassTag
 
-object SparkStreaming extends Logging {
+object SparkStreaming {
 
-
-  //  fileStream produces UnionRDD of NewHadoopRDDs.The good part about NewHadoopRDDs created by sc
-  //  .newAPIHadoopFile is that their names are set to their paths
+  private val log = LoggerFactory.getLogger(SparkStreaming.getClass)
+  private val tableName = "ns:distinct_msg_test"
+  private val colName = "file_no"
 
   def namedTextFileStream(ssc: StreamingContext, dir: String): DStream[String] =
     ssc.fileStream[LongWritable, Text, TextInputFormat](dir)
@@ -43,34 +45,35 @@ object SparkStreaming extends Logging {
   }
 
   def main(args: Array[String]) = {
-    //LogLevelUtils.setLogLevels()
-    val conf = new SparkConf().setAppName("Process by file").setMaster("yarn")
+    val conf = new SparkConf().setAppName("distinct-data").setMaster("yarn")
     val ssc = new StreamingContext(conf, Seconds(3))
-    val dStream = namedTextFileStream(ssc, "file:///home/tiger/spark-in-practice-master/data/")
+    //    val dStream = namedTextFileStream(ssc, "file:///home/tiger/distinct-data/data/") //local file
+    val dStream = namedTextFileStream(ssc, "hdfs:///home/tiger/spark-in-practice-master/data/")
 
     def byFileTransformer(filename: String)(rdd: RDD[String]): RDD[(String, String)] =
       rdd.map(line => (filename, line))
 
     val data = dStream.transform(rdd => transformByFile(rdd, byFileTransformer))
     data.print()
-    val tableName = "ns:distinct_msg"
     data.foreachRDD(rdd => {
       rdd.foreach(s => {
         val filename = s._1.split("\\.")(0)
         val line = s._2
         val rowKey = ShaUtils.encrypt(line.split("\t"))
-        val hBaseClient = new JavaHBaseClient("10.1.62.109", "2181")
-        if (!hBaseClient.existsRowKey(tableName, rowKey)) {
-          System.out.println("insert line=" + line)
+        val puts: java.util.List[RowEntity] = null
+        if (!HBaseClient.existsRowKey(tableName, rowKey)) {
           log.info("insert line=" + line)
-          hBaseClient.insert(tableName, rowKey, "file_no", "file_no", filename)
-          //TODO insert hive
+          val bean = new RowEntity(rowKey, colName, filename)
+          puts.add(bean)
+          //HBaseClient.insert(tableName, rowKey, colName, colName, filename)
         } else {
-          System.err.println("not insert filename=" + filename + " line=" + line)
           log.error("not insert filename=" + filename + " line=" + line)
         }
+        if (!puts.isEmpty) {
+          HBaseClient.batchAddRow(tableName, colName, puts)
+//          HiveClient.add()
+        }
       })
-
     })
     ssc.start()
     ssc.awaitTermination()

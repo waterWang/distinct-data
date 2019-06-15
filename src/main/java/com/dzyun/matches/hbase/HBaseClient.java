@@ -2,11 +2,10 @@ package com.dzyun.matches.hbase;
 
 
 import com.dzyun.matches.util.ConstUtil;
-import com.dzyun.matches.util.LabelEntity;
+import com.dzyun.matches.dto.RowEntity;
 import com.dzyun.matches.util.LabelResult;
-import com.dzyun.matches.util.MessageException;
+import com.dzyun.matches.util.MsgException;
 import com.dzyun.matches.util.ResultFormatter;
-import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HBaseConfiguration;
@@ -29,41 +28,45 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Hbase 通用接口
  */
-public class JavaHBaseClient {
+public class HBaseClient {
 
-  public static Configuration conf;
-  public static Connection conn;
-  public static Admin admin;
+  private static final Logger log = LoggerFactory.getLogger(HBaseClient.class);
 
-  private final static String ROWKEY = "rowKey";
+  private static final String QUORUM = "dz-prod-dc1-hadoop3,dz-prod-dc1-hadoop2,dz-prod-dc1-hadoop1";
+  private static final String CLIENT_PORT = "2181";
+  private static Configuration conf = null;
+  private static Connection conn = null;
+  private static Admin admin = null;
 
-  public static void main(String[] args) {
-    JavaHBaseClient hBaseClient = new JavaHBaseClient("dz-prod-dc1-hadoop3,dz-prod-dc1-hadoop2,dz-prod-dc1-hadoop1", "2181");
-    String tableName = "ns:distinct_msg";
+
+  static {
     try {
-//      hBaseClient.insert(tableName, "qwertyupoiuyt", "file_no", "file_no", "L120190606_123");
-//      LabelResult res = hBaseClient.getRowData(tableName, "qwertyupoiuyt1", "file_no");
-//      System.out.println(res.getEntityList().get(0).toString());
-      System.out.println(hBaseClient.existsRowKey(tableName,"c63198986baad0381569e3be4fbcfb4e12b9a050"));
-    } catch (Exception e) {
+      conf = HBaseConfiguration.create();
+      conf.set(ConstUtil.HBASE_ZOOKEEPER_PROPERTY_CLIENTPORT, CLIENT_PORT);
+      conf.set(ConstUtil.HBASE_ZOOKEEPER_QUORUM, QUORUM);
+      conn = ConnectionFactory.createConnection(conf);
+      admin = conn.getAdmin();
+    } catch (IOException e) {
       e.printStackTrace();
     }
   }
 
-  public JavaHBaseClient(String ip, String port) {
-    conf = HBaseConfiguration.create();
-    conf.set(ConstUtil.HBASE_ZOOKEEPER_PROPERTY_CLIENTPORT, port);
-    conf.set(ConstUtil.HBASE_ZOOKEEPER_QUORUM, ip);
 
+  public static void main(String[] args) {
     try {
-      conn = ConnectionFactory.createConnection(conf);
-      admin = conn.getAdmin();
-    } catch (IOException e) {
-      throw new MessageException("Hbase连接初始化错误", e);
+//      hBaseClient.insert(tableName, "qwertyupoiuyt", "file_no", "file_no", "L120190606_123");
+//      LabelResult res = hBaseClient.getRowData(tableName, "qwertyupoiuyt1", "file_no");
+//      System.out.println(res.getEntityList().get(0).toString());
+      System.out
+          .println(existsRowKey("ns:distinct_msg", "c63198986baad0381569e3be4fbcfb4e12b9a050"));
+    } catch (Exception e) {
+      e.printStackTrace();
     }
   }
 
@@ -81,7 +84,7 @@ public class JavaHBaseClient {
         conn.close();
       }
     } catch (IOException e) {
-      throw new MessageException("关闭失败", e);
+      throw new MsgException("关闭失败", e);
     }
 
   }
@@ -96,7 +99,7 @@ public class JavaHBaseClient {
     TableName tableName = TableName.valueOf(table);
     try {
       if (admin.tableExists(tableName)) {
-        throw new MessageException("该表已存在");
+        throw new MsgException("该表已存在");
       } else {
         HTableDescriptor hTableDescriptor = new HTableDescriptor(tableName);
         for (String col : columnFamilies) {
@@ -107,7 +110,7 @@ public class JavaHBaseClient {
         admin.createTable(hTableDescriptor);
       }
     } catch (IOException e) {
-      throw new MessageException("建表失败", e);
+      throw new MsgException("建表失败", e);
     }
   }
 
@@ -124,7 +127,7 @@ public class JavaHBaseClient {
     TableName tableName = TableName.valueOf(table);
     try {
       if (admin.tableExists(tableName)) {
-        throw new MessageException("该表已存在");
+        throw new MsgException("该表已存在");
       } else {
         HTableDescriptor hTableDescriptor = new HTableDescriptor(tableName);
         HColumnDescriptor hColumnDescriptor = new HColumnDescriptor(colFamily);
@@ -133,7 +136,7 @@ public class JavaHBaseClient {
         admin.createTable(hTableDescriptor);
       }
     } catch (IOException e) {
-      throw new MessageException("建表失败", e);
+      throw new MsgException("建表失败", e);
     }
   }
 
@@ -150,7 +153,7 @@ public class JavaHBaseClient {
         admin.deleteTable(tableName);
       }
     } catch (IOException e) {
-      throw new MessageException("删除表失败", e);
+      throw new MsgException("删除表失败", e);
     }
   }
 
@@ -167,7 +170,7 @@ public class JavaHBaseClient {
         admin.disableTable(tableName);
       }
     } catch (IOException e) {
-      throw new MessageException("关闭表失败", e);
+      throw new MsgException("关闭表失败", e);
     }
   }
 
@@ -190,7 +193,7 @@ public class JavaHBaseClient {
       admin.deleteSnapshot(snapshotName);
       admin.deleteTable(oldTable);
     } catch (Exception e) {
-      throw new MessageException("表名修改失败", e);
+      throw new MsgException("表名修改失败", e);
     }
   }
 
@@ -205,7 +208,7 @@ public class JavaHBaseClient {
         list.add(hTableDescriptor.getNameAsString());
       }
     } catch (IOException e) {
-      throw new MessageException("获取表名列表失败", e);
+      throw new MsgException("获取表名列表失败", e);
     }
     return list;
   }
@@ -219,7 +222,7 @@ public class JavaHBaseClient {
    * @param col 字段
    * @param value 值
    */
-  public void insert(String tableName, String rowKey, String colFamily, String col,
+  public static void insert(String tableName, String rowKey, String colFamily, String col,
       String value) throws IOException {
     TableName tablename = TableName.valueOf(tableName);
     Table table = conn.getTable(tablename);
@@ -255,30 +258,47 @@ public class JavaHBaseClient {
    * 给指定的表批量添加数据
    *
    * @param tableName 表名
-   * @param entityList 批量插入数据实体
+   * @param rows 批量插入数据实体
    * @param colFamily 列族
    */
-  public void bulkInsertRow(String tableName, String colFamily, List<LabelEntity> entityList,
-      long version) throws IOException {
-    if (!StringUtils.isNotEmpty(colFamily)) {
+  /*public static void batchAddRow(String tableName, String colFamily, List<RowEntity> rows)
+      throws IOException {
+    if (StringUtils.isEmpty(colFamily)) {
       colFamily = ConstUtil.COLUMNFAMILY_DEFAULT;
     }
-    if (!CollectionUtils.isEmpty(entityList)) {
-      TableName tablename = TableName.valueOf(tableName);
-      Table table = conn.getTable(tablename);
+    if (!CollectionUtils.isEmpty(rows)) {
+      Table table = conn.getTable(TableName.valueOf(tableName));
       List<Put> list = new ArrayList<>();
-      for (LabelEntity entity : entityList) {
-        if (MapUtils.isNotEmpty(entity.getEntity())) {
-          Put put = new Put(Bytes.toBytes(entity.getRowKey()));
-          Map<String, Object> map = entity.getEntity();
-          for (String key : map.keySet()) {
-            put.addColumn(Bytes.toBytes(colFamily), Bytes.toBytes(key), version,
-                Bytes.toBytes(map.get(key).toString()));
+      for (RowEntity row : rows) {
+        if (MapUtils.isNotEmpty(row.getEntity())) {
+          Put put = new Put(Bytes.toBytes(row.getRowKey()));
+          Map<String, Object> map = row.getEntity();
+
+          for (Entry<String, Object> e : map.entrySet()) {
+            put.addColumn(Bytes.toBytes(colFamily), Bytes.toBytes(e.getKey()),
+                Bytes.toBytes(e.getValue().toString()));
           }
           list.add(put);
         }
       }
       table.put(list);
+    }
+  }*/
+  public static void batchAddRow(String tableName, String colFamily, List<RowEntity> rows)
+      throws IOException {
+    if (StringUtils.isEmpty(colFamily)) {
+      colFamily = ConstUtil.COLUMNFAMILY_DEFAULT;
+    }
+    if (!CollectionUtils.isEmpty(rows)) {
+      Table table = conn.getTable(TableName.valueOf(tableName));
+      List<Put> puts = new ArrayList<>();
+      for (RowEntity row : rows) {
+        Put put = new Put(Bytes.toBytes(row.getRowKey()));
+        put.addColumn(Bytes.toBytes(colFamily), Bytes.toBytes(row.getCol()),
+            Bytes.toBytes(row.getValue()));
+        puts.add(put);
+      }
+      table.put(puts);
     }
   }
 
@@ -356,7 +376,7 @@ public class JavaHBaseClient {
   }
 
 
-  public Boolean existsRowKey(String tableName, String rowKey) {
+  public static Boolean existsRowKey(String tableName, String rowKey) {
     Table table;
     Get get = new Get(Bytes.toBytes(rowKey));
     get.setCheckExistenceOnly(true);

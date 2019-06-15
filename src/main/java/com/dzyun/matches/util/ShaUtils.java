@@ -8,7 +8,6 @@ public class ShaUtils {
 
   public static String evaluate(final String str) {
     if (StringUtils.isBlank(str)) {
-//      logger.error("----------------------msg加密出错，rowkey");
       return null;
     }
     MessageDigest digest;
