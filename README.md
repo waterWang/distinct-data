@@ -12,15 +12,20 @@ create 'ns:distinct_msg',{NAME=>'file_no',TTL=>5184000}
 truncate 'ns:distinct_msg'
 
 
-create database tmp;
-
-CREATE  TABLE IF NOT EXISTS  tmp.tmp_msg(
-  `app_name` String  COMMENT '应用名字',
-  `phone_id` String COMMENT '手机号',
-  `event_time` String COMMENT '短信生产时间格式化 yyyy-MM-dd HH:mm:ss',
-  `msg` String COMMENT '短信内容',
-  `main_call_no` String COMMENT '主叫号码'
+REATE  TABLE IF NOT EXISTS  tmp.tmp_msg_www_0630(
+`phone_id` String  COMMENT 'phone_id',
+`create_time` BIGINT  COMMENT 'create_time',
+  `app_name` String  COMMENT 'app_name',
+  `main_call_no` String COMMENT 'main_call_no',
+  `msg` String COMMENT 'msg'
 )
-PARTITIONED  by (thedate String, file_no String)
+PARTITIONED  by (the_date String,file_no String)
 ROW FORMAT DELIMITED FIELDS TERMINATED BY '\t'
-STORED AS textfile;
+STORED AS orc;
+
+spark-submit --class com.dzyun.matches.hbase.HBaseClient --master yarn /home/tiger/distinct-data/target/distinct-data-1.0-SNAPSHOT-jar-with-dependencies.jar
+
+
+spark-submit --class com.dzyun.matches.hive.HiveClient --master yarn /home/tiger/distinct-data/target/distinct-data-1.0-SNAPSHOT-jar-with-dependencies.jar
+
+mvn clean assembly:assembly -DskipTests
