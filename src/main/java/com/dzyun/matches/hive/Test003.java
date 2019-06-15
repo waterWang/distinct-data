@@ -26,7 +26,7 @@ public class Test003 {
     Dataset ds = spark.createDataFrame(msgs, MsgEntity.class).toDF("phone_id", "create_time",
         "app_name", "main_call_no", "msg", "the_date", "file_no");
     ds.write().mode("append").partitionBy("the_date").partitionBy("file_no")
-        .saveAsTable("new_test_partition");
+        .saveAsTable("tmp.tmp_msg_www_0630");
     ds.show();
   }
 }
