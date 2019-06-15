@@ -3,7 +3,7 @@ package com.dzyun.matches.streaming
 import java.io.File
 
 import com.dzyun.matches.hbase.JavaHBaseClient
-import com.dzyun.matches.util.{LogLevelUtils, ShaUtils}
+import com.dzyun.matches.util.ShaUtils
 import org.apache.hadoop.io.{LongWritable, Text}
 import org.apache.hadoop.mapreduce.lib.input.TextInputFormat
 import org.apache.spark.SparkConf
@@ -14,8 +14,7 @@ import org.apache.spark.internal.Logging
 
 import scala.reflect.ClassTag
 
-object SparkStreaming extends Logging{
-
+object SparkStreaming extends Logging {
 
 
   //  fileStream produces UnionRDD of NewHadoopRDDs.The good part about NewHadoopRDDs created by sc
