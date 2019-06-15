@@ -12,9 +12,12 @@ import scala.collection.Seq;
 public class HiveClient {
 
   private static SparkSession spark;
-  private static Seq<String> cols = JavaConverters
-      .asScalaIteratorConverter(Arrays.asList("phone_id", "create_time",
-          "app_name", "main_call_no", "msg", "the_date", "file_no").iterator()).asScala().toSeq();
+//  private static Seq<String> cols = JavaConverters
+//      .asScalaIteratorConverter(Arrays.asList("phone_id", "create_time",
+//          "app_name", "main_call_no", "msg", "the_date", "file_no").iterator()).asScala().toSeq();
+private static Seq<String> cols = JavaConverters
+    .asScalaIteratorConverter(Arrays.asList("app_name", "create_time",
+        "file_no", "main_call_no", "msg", "phone_id", "the_date").iterator()).asScala().toSeq();
 
   private static String tableName = "tmp.tmp_msg_www_0630";
 
