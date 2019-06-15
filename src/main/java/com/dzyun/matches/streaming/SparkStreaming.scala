@@ -48,7 +48,7 @@ object SparkStreaming {
     val conf = new SparkConf().setAppName("distinct-data").setMaster("yarn")
     val ssc = new StreamingContext(conf, Seconds(3))
     //    val dStream = namedTextFileStream(ssc, "file:///home/tiger/distinct-data/data/") //local file
-    val dStream = namedTextFileStream(ssc, "hdfs:///home/tiger/spark-in-practice-master/data/")
+    val dStream = namedTextFileStream(ssc, "hdfs:///home/tiger/origin_data_files/data/")
 
     def byFileTransformer(filename: String)(rdd: RDD[String]): RDD[(String, String)] =
       rdd.map(line => (filename, line))
