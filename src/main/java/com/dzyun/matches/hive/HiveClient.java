@@ -1,6 +1,7 @@
 package com.dzyun.matches.hive;
 
 import com.dzyun.matches.dto.MsgEntity;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import org.apache.spark.sql.Dataset;
@@ -34,6 +35,17 @@ public class HiveClient {
     ds.write().mode("append").format("Hive").partitionBy("the_date", "file_no")
         .saveAsTable(tableName);
     ds.show();
+  }
+
+  public static void main(String[] args) {
+    List<MsgEntity> msgs = new ArrayList<>();
+    for (int i = 0; i < 10; i++) {
+      MsgEntity bean = new MsgEntity("861832882276" + i, 156000878L + i,
+          "爱又米", "95555", "尊敬的xxx",
+          "2019-06-06", "L120190606_123");
+      msgs.add(bean);
+    }
+    batchAdd(msgs);
   }
 
 
