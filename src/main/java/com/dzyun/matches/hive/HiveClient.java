@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import org.apache.spark.sql.Dataset;
+import org.apache.spark.sql.Row;
 import org.apache.spark.sql.SparkSession;
 import scala.collection.JavaConverters;
 import scala.collection.Seq;
@@ -36,10 +37,10 @@ public class HiveClient {
 
   public static void batchAdd(List<MsgEntity> msgs) {
 
-    Dataset ds = spark.createDataFrame(msgs, MsgEntity.class).toDF(cols);
+    Dataset<Row> ds = spark.createDataFrame(msgs, MsgEntity.class).toDF(cols);
     ds.show();
     ds.write().mode("append").format("Hive").partitionBy("the_date", "file_no")
-        .saveAsTable(tableName);
+        .insertInto(tableName);
     ds.show();
   }
 
