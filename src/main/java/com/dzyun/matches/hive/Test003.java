@@ -22,9 +22,13 @@ public class Test003 {
           "2019-06-06", "L120190606_123");
       msgs.add(bean);
     }
+    spark.sqlContext().setConf("hive.exec.dynamic.partition", "true");
+    spark.sqlContext().setConf("hive.exec.dynamic.partition.mode", "nonstrict");
     Dataset ds = spark.createDataFrame(msgs, MsgEntity.class).toDF("phone_id", "create_time",
         "app_name", "main_call_no", "msg", "the_date", "file_no");
-    ds.write().mode("append").format("Hive").option("hive.exec.dynamic.partition.mode","nonstrict").partitionBy("the_date","file_no").saveAsTable("tmp.tmp_msg_www_0630");
+    ds.write().mode("append").format("Hive")
+//        .option("hive.exec.dynamic.partition.mode","nonstrict")
+        .partitionBy("the_date","file_no").saveAsTable("tmp.tmp_msg_www_0630");
     ds.show();
   }
 }
