@@ -12,9 +12,9 @@ create 'ns:distinct_msg',{NAME=>'file_no',TTL=>5184000}
 truncate 'ns:distinct_msg'
 
 
-REATE  TABLE IF NOT EXISTS  tmp.tmp_msg_www_0630(
-`phone_id` String  COMMENT 'phone_id',
-`create_time` BIGINT  COMMENT 'create_time',
+CREATE  TABLE IF NOT EXISTS  tmp.tmp_msg_www_0630(
+  `phone_id` String  COMMENT 'phone_id',
+  `create_time` BIGINT  COMMENT 'create_time',
   `app_name` String  COMMENT 'app_name',
   `main_call_no` String COMMENT 'main_call_no',
   `msg` String COMMENT 'msg'

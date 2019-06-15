@@ -85,4 +85,17 @@ public class MsgEntity implements Serializable {
     this.the_date = the_date;
     this.file_no = file_no;
   }
+
+  @Override
+  public String toString() {
+    return "MsgEntity{" +
+        "phone_id='" + phone_id + '\'' +
+        ", create_time=" + create_time +
+        ", app_name='" + app_name + '\'' +
+        ", main_call_no='" + main_call_no + '\'' +
+        ", msg='" + msg + '\'' +
+        ", the_date='" + the_date + '\'' +
+        ", file_no='" + file_no + '\'' +
+        '}';
+  }
 }
