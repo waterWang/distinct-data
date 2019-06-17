@@ -39,12 +39,15 @@ public class HBaseClient {
 
   private static final Logger log = LoggerFactory.getLogger(HBaseClient.class);
 
-  private static final String QUORUM = YamlUtil.getPatam("quorum");
-  private static final String CLIENT_PORT = YamlUtil.getPatam("hbasePort");
+  private static final String QUORUM = "dz-prod-dc1-hadoop1,dz-prod-dc1-hadoop2,dz-prod-dc1-hadoop3";
+//  private static final String QUORUM = YamlUtil.getPatam("quorum");
+//  private static final String CLIENT_PORT = YamlUtil.getPatam("hbasePort");
+  private static final String CLIENT_PORT = "2181";
   private static Configuration conf = null;
   private static Connection conn = null;
   private static Admin admin = null;
-  private static String tableName = YamlUtil.getPatam("hbaseTableName");
+//  private static String tableName = YamlUtil.getPatam("hbaseTableName");
+  private static String tableName = "ns:distinct_msg_test";
   private static String colName = "file_no";
 
 

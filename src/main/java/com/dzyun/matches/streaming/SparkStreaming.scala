@@ -23,7 +23,8 @@ object SparkStreaming {
   private val colName = "file_no"
   private val line_regex = "\t"
   private val file_name_regex = "\\."
-  private val hdfs_path = YamlUtil.getPatam("hdfsPath")
+//  private val hdfs_path = YamlUtil.getPatam("hdfsPath")
+  private val hdfs_path = "hdfs:///home/tiger/test/"
 
   def namedTextFileStream(ssc: StreamingContext, dir: String): DStream[String] =
     ssc.fileStream[LongWritable, Text, TextInputFormat](dir)

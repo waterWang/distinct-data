@@ -23,7 +23,8 @@ public class HiveClient {
       .asScalaIteratorConverter(Arrays.asList("app_name", "create_time",
           "file_no", "main_call_no", "msg", "phone_id", "the_date").iterator()).asScala().toSeq();
 
-  private static String tableName = YamlUtil.getPatam("hiveTableName");
+//  private static String tableName = YamlUtil.getPatam("hiveTableName");
+  private static String tableName = YamlUtil.getPatam("tmp.tmp_msg_www_0630");
 
   static {
     spark = SparkSession
