@@ -83,7 +83,7 @@ object SparkStreaming {
     val start = System.currentTimeMillis()
     if (null != data) {
       data.foreachRDD(rdd => {
-        rdd.take(10).foreach(println)
+        rdd.take(3).foreach(println)
         val hives: java.util.List[MsgEntity] = null
         val hbases: java.util.List[RowEntity] = null
         rdd.foreach(s => {
