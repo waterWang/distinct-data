@@ -1,5 +1,7 @@
 package com.dzyun.matches.util;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
@@ -35,6 +37,14 @@ public class DateUtils {
     } else {
       return format(new Date(Long.parseLong(millisStr)), ISO_DATE_FORMAT.getPattern(), null, null);
     }
+  }
+
+  public static String strToDateFormat(String date) throws ParseException {
+    SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd");
+    formatter.setLenient(false);
+    Date newDate = formatter.parse(date);
+    formatter = new SimpleDateFormat("yyyy-MM-dd");
+    return formatter.format(newDate);
   }
 
   public static String format(long millis, String pattern, Locale locale) {

@@ -17,6 +17,7 @@ import org.apache.spark.streaming.dstream.DStream
 import org.slf4j.LoggerFactory
 
 import scala.reflect.ClassTag
+import scala.util.Success
 
 object SparkStreaming {
 
@@ -80,9 +81,10 @@ object SparkStreaming {
       rdd.map(line => (filename, line))
 
     val data = dStream.transform(rdd => transformByFile(rdd, byFileTransformer))
-    log.info("=============start streaming==============")
-    val start = System.currentTimeMillis()
+
     if (null != data) {
+      log.warn("=============start streaming==============")
+      val start = System.currentTimeMillis()
       data.foreachRDD(rdd => {
         rdd.take(3).foreach(println)
         val hives: java.util.List[MsgEntity] = new util.ArrayList[MsgEntity]()
@@ -91,24 +93,20 @@ object SparkStreaming {
 
           val filename = s._1.split(file_name_regex)(0)
           val line = s._2
-          log.info("============line=" + line)
+          log.warn("============line=" + line)
           val arr = line.split(line_regex)
           if (arr.length >= 5) {
             val rowKey = ShaUtils.encrypt(arr(0), arr(1), arr(3), arr(4))
             if (!HBaseClient.existsRowKey(rowKey)) {
-              log.info("insert line=" + line)
+              log.warn("insert line=" + line)
               val hiveBean = new MsgEntity()
 
               hiveBean.setPhone_id(arr(0))
-              if (StringUtils.isBlank(arr(1)) || "NULL".equalsIgnoreCase(arr(1).trim)) {
-                hiveBean.setCreate_time(-1L)
-              } else {
-                hiveBean.setCreate_time(arr(1).toLong)
-              }
+              hiveBean.setCreate_time(str2Long(arr(1)))
               hiveBean.setApp_name(arr(2))
               hiveBean.setMain_call_no(arr(3))
               hiveBean.setMsg(arr(4))
-              hiveBean.setThe_date(DateUtils.format(arr(1)))
+              hiveBean.setThe_date(DateUtils.strToDateFormat(filename.split("_")(0).substring(2)))
               hiveBean.setFile_no(filename)
 
               val hbaseBean = new RowEntity()
@@ -118,20 +116,30 @@ object SparkStreaming {
               hives.add(hiveBean)
               hbases.add(hbaseBean)
             } else {
-              log.error("not insert filename=" + filename + " line=" + line)
+              log.warn("not insert filename=" + filename + " line=" + line)
             }
           }
         })
-        if (null != hbases && !hbases.isEmpty) {
+        if (!hbases.isEmpty) {
           HBaseClient.batchAdd(hbases)
           HiveClient.batchAdd(hives)
         }
       })
+      val cost = System.currentTimeMillis() - start
+      log.warn("=============end streaming,cost time is==============" + cost / 1000)
     }
-    val cost = System.currentTimeMillis() - start
-    log.info("=============end streaming,cost time is==============" + cost / 1000)
+
     ssc.start()
     ssc.awaitTermination()
+  }
+
+
+  def str2Long(s: String): Long = {
+    val r1 = scala.util.Try(s.toLong)
+    r1 match {
+      case Success(_) => s.toLong;
+      case _ => -1L
+    }
   }
 
 }
