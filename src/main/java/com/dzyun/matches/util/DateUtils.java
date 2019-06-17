@@ -3,6 +3,7 @@ package com.dzyun.matches.util;
 import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.FastDateFormat;
 
 public class DateUtils {
@@ -29,6 +30,9 @@ public class DateUtils {
   }
 
   public static String format(String millisStr) {
+    if (StringUtils.isBlank(millisStr)) {
+      return "NULL_TIMESTAMP";
+    }
     return format(new Date(Long.parseLong(millisStr)), ISO_DATE_FORMAT.getPattern(), null, null);
   }
 

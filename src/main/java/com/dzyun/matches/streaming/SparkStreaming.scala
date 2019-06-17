@@ -7,6 +7,7 @@ import com.dzyun.matches.dto.{MsgEntity, RowEntity}
 import com.dzyun.matches.hbase.HBaseClient
 import com.dzyun.matches.hive.HiveClient
 import com.dzyun.matches.util.{DateUtils, ShaUtils}
+import org.apache.commons.lang3.StringUtils
 import org.apache.hadoop.io.{LongWritable, Text}
 import org.apache.hadoop.mapreduce.lib.input.TextInputFormat
 import org.apache.spark.SparkConf
@@ -98,7 +99,11 @@ object SparkStreaming {
             val hiveBean = new MsgEntity()
 
             hiveBean.setPhone_id(arr(0))
-            hiveBean.setCreate_time(arr(1).toLong)
+            if(StringUtils.isBlank(arr(1))){
+              hiveBean.setCreate_time(-1L)
+            }else{
+              hiveBean.setCreate_time(arr(1).toLong)
+            }
             hiveBean.setApp_name(arr(2))
             hiveBean.setMain_call_no(arr(3))
             hiveBean.setMsg(arr(4))
