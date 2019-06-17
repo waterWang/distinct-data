@@ -6,7 +6,6 @@ import com.dzyun.matches.dto.RowEntity;
 import com.dzyun.matches.util.LabelResult;
 import com.dzyun.matches.util.MsgException;
 import com.dzyun.matches.util.ResultFormatter;
-import com.dzyun.matches.util.YamlUtil;
 import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HBaseConfiguration;

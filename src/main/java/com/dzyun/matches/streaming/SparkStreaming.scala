@@ -1,12 +1,11 @@
 package com.dzyun.matches.streaming
 
 import java.io.File
-import java.text.SimpleDateFormat
 
 import com.dzyun.matches.dto.{MsgEntity, RowEntity}
 import com.dzyun.matches.hbase.HBaseClient
 import com.dzyun.matches.hive.HiveClient
-import com.dzyun.matches.util.{DateUtils, ShaUtils, YamlUtil}
+import com.dzyun.matches.util.{DateUtils, ShaUtils}
 import org.apache.hadoop.io.{LongWritable, Text}
 import org.apache.hadoop.mapreduce.lib.input.TextInputFormat
 import org.apache.spark.SparkConf

@@ -1,7 +1,6 @@
 package com.dzyun.matches.hive;
 
 import com.dzyun.matches.dto.MsgEntity;
-import com.dzyun.matches.util.YamlUtil;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -24,7 +23,7 @@ public class HiveClient {
           "file_no", "main_call_no", "msg", "phone_id", "the_date").iterator()).asScala().toSeq();
 
 //  private static String tableName = YamlUtil.getPatam("hiveTableName");
-  private static String tableName = YamlUtil.getPatam("tmp.tmp_msg_www_0630");
+  private static String tableName = "tmp.tmp_msg_www_0630";
 
   static {
     spark = SparkSession
