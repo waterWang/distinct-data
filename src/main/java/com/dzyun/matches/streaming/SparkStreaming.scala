@@ -49,15 +49,21 @@ object SparkStreaming {
         )
       )
 
+
+
   def transformByFile[U: ClassTag](rdd: RDD[String], func: String => RDD[String] => RDD[U]): RDD[U] = {
     new UnionRDD(rdd.context,
       rdd.dependencies.map { dep =>
         if (dep.rdd.isEmpty) None
         else {
           val filename = new File(dep.rdd.name).getName
-          Some(
-            func(filename)(dep.rdd.asInstanceOf[RDD[String]]).setName(filename)
-          )
+          if (filename.endsWith(".tmp")) None
+          else {
+            Some(
+              func(filename)(dep.rdd.asInstanceOf[RDD[String]]).setName(filename)
+            )
+          }
+
         }
       }.flatten
     )
@@ -67,14 +73,14 @@ object SparkStreaming {
     val conf = new SparkConf().setAppName("distinct-data").setMaster("yarn")
     val ssc = new StreamingContext(conf, Seconds(3))
 
-//    val ssc = StreamingContext.getOrCreate(checkpoint_dir, createContext _)
+    //    val ssc = StreamingContext.getOrCreate(checkpoint_dir, createContext _)
     val dStream = namedTextFileStream(ssc, file_dir)
 
     def byFileTransformer(filename: String)(rdd: RDD[String]): RDD[(String, String)] =
       rdd.map(line => (filename, line))
 
     val data = dStream.transform(rdd => transformByFile(rdd, byFileTransformer))
-    data.print()
+    data.print(5)
     log.info("=============start streaming==============")
     val start = System.currentTimeMillis()
     if (null != data) {
