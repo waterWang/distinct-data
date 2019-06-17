@@ -36,6 +36,7 @@ object SparkStreaming {
     val conf = new SparkConf().setAppName("distinct-data").setMaster("yarn")
     val ssc = new StreamingContext(conf, Seconds(3))
     ssc.checkpoint(checkpoint_dir)
+    ssc.sparkContext.setLogLevel("WARN")
     ssc
   }
 
@@ -63,8 +64,10 @@ object SparkStreaming {
   }
 
   def main(args: Array[String]) = {
+    val conf = new SparkConf().setAppName("distinct-data").setMaster("yarn")
+    val ssc = new StreamingContext(conf, Seconds(3))
 
-    val ssc = StreamingContext.getOrCreate(checkpoint_dir, createContext _)
+//    val ssc = StreamingContext.getOrCreate(checkpoint_dir, createContext _)
     val dStream = namedTextFileStream(ssc, file_dir)
 
     def byFileTransformer(filename: String)(rdd: RDD[String]): RDD[(String, String)] =
@@ -74,7 +77,7 @@ object SparkStreaming {
     data.print()
     log.info("=============start streaming==============")
     val start = System.currentTimeMillis()
-    if(null != data){
+    if (null != data) {
       data.foreachRDD(rdd => {
         val hives: java.util.List[MsgEntity] = null
         val hbases: java.util.List[RowEntity] = null
