@@ -52,7 +52,6 @@ object SparkStreaming {
       )
 
 
-
   def transformByFile[U: ClassTag](rdd: RDD[String], func: String => RDD[String] => RDD[U]): RDD[U] = {
     new UnionRDD(rdd.context,
       rdd.dependencies.map { dep =>
@@ -89,7 +88,7 @@ object SparkStreaming {
         val hives: java.util.List[MsgEntity] = new util.ArrayList[MsgEntity]()
         val hbases: java.util.List[RowEntity] = new util.ArrayList[RowEntity]()
         rdd.foreach(s => {
-          log.info("============sss="+s.toString()+"====s1"+s._1);
+          log.info("============sss=" + s.toString() + "====s1" + s._1);
           val filename = s._1.split(file_name_regex)(0)
           val line = s._2
           val arr = line.split(line_regex)
@@ -99,9 +98,9 @@ object SparkStreaming {
             val hiveBean = new MsgEntity()
 
             hiveBean.setPhone_id(arr(0))
-            if(StringUtils.isBlank(arr(1))){
+            if (StringUtils.isBlank(arr(1)) || "NULL".equalsIgnoreCase(arr(1).trim)) {
               hiveBean.setCreate_time(-1L)
-            }else{
+            } else {
               hiveBean.setCreate_time(arr(1).toLong)
             }
             hiveBean.setApp_name(arr(2))

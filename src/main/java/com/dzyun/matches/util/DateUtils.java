@@ -30,10 +30,11 @@ public class DateUtils {
   }
 
   public static String format(String millisStr) {
-    if (StringUtils.isBlank(millisStr)) {
+    if (StringUtils.isBlank(millisStr) || "NULL".equalsIgnoreCase(millisStr.trim())) {
       return "NULL_TIMESTAMP";
+    } else {
+      return format(new Date(Long.parseLong(millisStr)), ISO_DATE_FORMAT.getPattern(), null, null);
     }
-    return format(new Date(Long.parseLong(millisStr)), ISO_DATE_FORMAT.getPattern(), null, null);
   }
 
   public static String format(long millis, String pattern, Locale locale) {
