@@ -56,14 +56,13 @@ object SparkStreaming {
       rdd.dependencies.map { dep =>
         if (dep.rdd.isEmpty) None
         else {
-          val filename = new File(dep.rdd.name).getName
-          if (filename.endsWith(".tmp")) None
+          if (dep.rdd.name.endsWith(".tmp")) None
           else {
+            val filename = new File(dep.rdd.name).getName
             Some(
               func(filename)(dep.rdd.asInstanceOf[RDD[String]]).setName(filename)
             )
           }
-
         }
       }.flatten
     )
