@@ -24,7 +24,7 @@ object SparkStreaming {
   private val file_name_regex = "\\."
   //  private val hdfs_path = YamlUtil.getPatam("hdfsPath")
   private val file_dir = "hdfs://nameservice2/home/tiger/origin_data_files_test/"
-  private val checkpoint_dir = "hdfs://nameservice2/tiger/streaming_checkpoint_data"
+  private val checkpoint_dir = "hdfs://nameservice2/tiger/test"
   //  private val file_dir = "file:///home/tiger/distinct-data/data/"
 
   /**
