@@ -1,6 +1,7 @@
 package com.dzyun.matches.streaming
 
 import java.io.File
+import java.util
 
 import com.dzyun.matches.dto.{MsgEntity, RowEntity}
 import com.dzyun.matches.hbase.HBaseClient
@@ -84,9 +85,10 @@ object SparkStreaming {
     if (null != data) {
       data.foreachRDD(rdd => {
         rdd.take(3).foreach(println)
-        val hives: java.util.List[MsgEntity] = null
-        val hbases: java.util.List[RowEntity] = null
+        val hives: java.util.List[MsgEntity] = new util.ArrayList[MsgEntity]()
+        val hbases: java.util.List[RowEntity] = new util.ArrayList[RowEntity]()
         rdd.foreach(s => {
+          log.info("============sss="+s.toString()+"====s1"+s._1);
           val filename = s._1.split(file_name_regex)(0)
           val line = s._2
           val arr = line.split(line_regex)
