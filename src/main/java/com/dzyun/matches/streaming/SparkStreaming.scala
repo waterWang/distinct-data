@@ -88,35 +88,38 @@ object SparkStreaming {
         val hives: java.util.List[MsgEntity] = new util.ArrayList[MsgEntity]()
         val hbases: java.util.List[RowEntity] = new util.ArrayList[RowEntity]()
         rdd.foreach(s => {
-          log.info("============sss=" + s.toString() + "====s1" + s._1);
+
           val filename = s._1.split(file_name_regex)(0)
           val line = s._2
+          log.info("============line=" + line)
           val arr = line.split(line_regex)
-          val rowKey = ShaUtils.encrypt(arr(0), arr(1), arr(3), arr(4))
-          if (!HBaseClient.existsRowKey(rowKey)) {
-            log.info("insert line=" + line)
-            val hiveBean = new MsgEntity()
+          if (arr.length >= 5) {
+            val rowKey = ShaUtils.encrypt(arr(0), arr(1), arr(3), arr(4))
+            if (!HBaseClient.existsRowKey(rowKey)) {
+              log.info("insert line=" + line)
+              val hiveBean = new MsgEntity()
 
-            hiveBean.setPhone_id(arr(0))
-            if (StringUtils.isBlank(arr(1)) || "NULL".equalsIgnoreCase(arr(1).trim)) {
-              hiveBean.setCreate_time(-1L)
+              hiveBean.setPhone_id(arr(0))
+              if (StringUtils.isBlank(arr(1)) || "NULL".equalsIgnoreCase(arr(1).trim)) {
+                hiveBean.setCreate_time(-1L)
+              } else {
+                hiveBean.setCreate_time(arr(1).toLong)
+              }
+              hiveBean.setApp_name(arr(2))
+              hiveBean.setMain_call_no(arr(3))
+              hiveBean.setMsg(arr(4))
+              hiveBean.setThe_date(DateUtils.format(arr(1)))
+              hiveBean.setFile_no(filename)
+
+              val hbaseBean = new RowEntity()
+              hbaseBean.setRowKey(rowKey)
+              hbaseBean.setCol(colName)
+              hbaseBean.setValue(filename)
+              hives.add(hiveBean)
+              hbases.add(hbaseBean)
             } else {
-              hiveBean.setCreate_time(arr(1).toLong)
+              log.error("not insert filename=" + filename + " line=" + line)
             }
-            hiveBean.setApp_name(arr(2))
-            hiveBean.setMain_call_no(arr(3))
-            hiveBean.setMsg(arr(4))
-            hiveBean.setThe_date(DateUtils.format(arr(1)))
-            hiveBean.setFile_no(filename)
-
-            val hbaseBean = new RowEntity()
-            hbaseBean.setRowKey(rowKey)
-            hbaseBean.setCol(colName)
-            hbaseBean.setValue(filename)
-            hives.add(hiveBean)
-            hbases.add(hbaseBean)
-          } else {
-            log.error("not insert filename=" + filename + " line=" + line)
           }
         })
         if (null != hbases && !hbases.isEmpty) {
