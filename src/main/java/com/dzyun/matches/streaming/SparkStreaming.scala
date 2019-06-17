@@ -22,8 +22,8 @@ object SparkStreaming {
   private val colName = "file_no"
   private val line_regex = "\t"
   private val file_name_regex = "\\."
-//  private val hdfs_path = YamlUtil.getPatam("hdfsPath")
-  private val hdfs_path = "hdfs:///home/tiger/test/"
+  //  private val hdfs_path = YamlUtil.getPatam("hdfsPath")
+  private val hdfs_path = "hdfs:///home/tiger/origin_data_files_test/"
 
   def namedTextFileStream(ssc: StreamingContext, dir: String): DStream[String] =
     ssc.fileStream[LongWritable, Text, TextInputFormat](dir)
@@ -58,6 +58,8 @@ object SparkStreaming {
 
     val data = dStream.transform(rdd => transformByFile(rdd, byFileTransformer))
     data.print()
+    log.info("=============start streaming==============")
+    val start = System.currentTimeMillis()
     data.foreachRDD(rdd => {
       val hives: java.util.List[MsgEntity] = null
       val hbases: java.util.List[RowEntity] = null
@@ -93,6 +95,8 @@ object SparkStreaming {
         HiveClient.batchAdd(hives)
       }
     })
+    val cost = System.currentTimeMillis() - start
+    log.info("=============end streaming,cost time is==============" + cost / 1000)
     ssc.start()
     ssc.awaitTermination()
   }
