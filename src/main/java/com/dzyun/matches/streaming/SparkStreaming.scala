@@ -6,7 +6,7 @@ import java.text.SimpleDateFormat
 import com.dzyun.matches.dto.{MsgEntity, RowEntity}
 import com.dzyun.matches.hbase.HBaseClient
 import com.dzyun.matches.hive.HiveClient
-import com.dzyun.matches.util.{DateUtils, ShaUtils}
+import com.dzyun.matches.util.{DateUtils, ShaUtils, YamlUtil}
 import org.apache.hadoop.io.{LongWritable, Text}
 import org.apache.hadoop.mapreduce.lib.input.TextInputFormat
 import org.apache.spark.SparkConf
@@ -23,6 +23,7 @@ object SparkStreaming {
   private val colName = "file_no"
   private val line_regex = "\t"
   private val file_name_regex = "\\."
+  private val hdfs_path = YamlUtil.getPatam("hdfsPath")
 
   def namedTextFileStream(ssc: StreamingContext, dir: String): DStream[String] =
     ssc.fileStream[LongWritable, Text, TextInputFormat](dir)
@@ -50,7 +51,7 @@ object SparkStreaming {
     val conf = new SparkConf().setAppName("distinct-data").setMaster("yarn")
     val ssc = new StreamingContext(conf, Seconds(3))
     //    val dStream = namedTextFileStream(ssc, "file:///home/tiger/distinct-data/data/") //local file
-    val dStream = namedTextFileStream(ssc, "hdfs:///home/tiger/origin_data_files/data/")
+    val dStream = namedTextFileStream(ssc, hdfs_path)
 
     def byFileTransformer(filename: String)(rdd: RDD[String]): RDD[(String, String)] =
       rdd.map(line => (filename, line))
@@ -83,7 +84,6 @@ object SparkStreaming {
           hbaseBean.setValue(filename)
           hives.add(hiveBean)
           hbases.add(hbaseBean)
-          //HBaseClient.insert(tableName, rowKey, colName, colName, filename)
         } else {
           log.error("not insert filename=" + filename + " line=" + line)
         }

@@ -6,6 +6,7 @@ import com.dzyun.matches.dto.RowEntity;
 import com.dzyun.matches.util.LabelResult;
 import com.dzyun.matches.util.MsgException;
 import com.dzyun.matches.util.ResultFormatter;
+import com.dzyun.matches.util.YamlUtil;
 import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HBaseConfiguration;
@@ -38,12 +39,12 @@ public class HBaseClient {
 
   private static final Logger log = LoggerFactory.getLogger(HBaseClient.class);
 
-  private static final String QUORUM = "dz-prod-dc1-hadoop3,dz-prod-dc1-hadoop2,dz-prod-dc1-hadoop1";
-  private static final String CLIENT_PORT = "2181";
+  private static final String QUORUM = YamlUtil.getPatam("quorum");
+  private static final String CLIENT_PORT = YamlUtil.getPatam("hbasePort");
   private static Configuration conf = null;
   private static Connection conn = null;
   private static Admin admin = null;
-  private static String tableName = "ns:distinct_msg_test";
+  private static String tableName = YamlUtil.getPatam("hbaseTableName");
   private static String colName = "file_no";
 
 
@@ -66,12 +67,7 @@ public class HBaseClient {
     for (int i = 0; i < 10; i++) {
       rows.add(new RowEntity("rowKey" + i, colName, "value" + i));
     }
-
     try {
-//      hBaseClient.insert(tableName, "qwertyupoiuyt", "file_no", "file_no", "L120190606_123");
-//      LabelResult res = hBaseClient.getRowData(tableName, "qwertyupoiuyt1", "file_no");
-//      System.out.println(res.getEntityList().get(0).toString());
-      
       batchAdd(rows);
       System.out.println(existsRowKey("rowKey5"));
     } catch (Exception e) {

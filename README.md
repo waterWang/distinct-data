@@ -29,3 +29,7 @@ spark-submit --class com.dzyun.matches.hbase.HBaseClient --master yarn /home/tig
 spark-submit --class com.dzyun.matches.hive.HiveClient --master yarn /home/tiger/distinct-data/target/distinct-data-1.0-SNAPSHOT-jar-with-dependencies.jar
 
 mvn clean assembly:assembly -DskipTests
+
+
+set hive.cli.print.header=true;
+set  hive.resultset.use.unique.column.names=false;

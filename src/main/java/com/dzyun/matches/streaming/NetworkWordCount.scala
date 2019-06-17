@@ -1,6 +1,5 @@
 package com.dzyun.matches.streaming
 
-import com.dzyun.matches.util.LogLevelUtils
 import org.apache.spark.SparkConf
 import org.apache.spark.storage.StorageLevel
 import org.apache.spark.streaming.{Seconds, StreamingContext}
@@ -18,7 +17,6 @@ import org.apache.spark.streaming.{Seconds, StreamingContext}
   */
 object NetworkWordCount {
   def main(args: Array[String]) {
-    LogLevelUtils.setLogLevels()
     // Create the context with a 1 second batch size
     val sparkConf = new SparkConf().setAppName("NetworkWordCount").setMaster("local[2]")
     val ssc = new StreamingContext(sparkConf, Seconds(1))

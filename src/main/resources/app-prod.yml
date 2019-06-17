@@ -1,0 +1,5 @@
+hdfsPath: hdfs:///home/tiger/test/
+quorum: "dz-prod-dc1-hadoop1,dz-prod-dc1-hadoop2,dz-prod-dc1-hadoop3"
+hbasePort: "2181"
+hbaseTableName: ns:distinct_msg_test
+hiveTableName: tmp.tmp_msg_www_0630
