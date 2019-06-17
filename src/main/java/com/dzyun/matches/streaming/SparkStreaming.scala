@@ -23,9 +23,20 @@ object SparkStreaming {
   private val line_regex = "\t"
   private val file_name_regex = "\\."
   //  private val hdfs_path = YamlUtil.getPatam("hdfsPath")
-  private val hdfs_path = "hdfs:///home/tiger/origin_data_files_test/"
+  private val file_dir = "hdfs:///home/tiger/origin_data_files_test/"
+//  private val file_dir = "file:///home/tiger/distinct-data/data/"
+
+  //TODO  checkpoint
+  //https://spark.apache.org/docs/2.2.0/streaming-programming-guide.html#checkpointing
+  def funcToCreateContext(): StreamingContext = {
+    val conf = new SparkConf().setAppName("distinct-data").setMaster("yarn")
+    val ssc = new StreamingContext(conf, Seconds(3))
+    ssc.checkpoint("") // set checkpoint directory
+    ssc
+  }
 
   def namedTextFileStream(ssc: StreamingContext, dir: String): DStream[String] =
+
     ssc.fileStream[LongWritable, Text, TextInputFormat](dir)
       .transform(rdd =>
         new UnionRDD(rdd.context, rdd.dependencies.map(dep =>
@@ -51,7 +62,7 @@ object SparkStreaming {
     val conf = new SparkConf().setAppName("distinct-data").setMaster("yarn")
     val ssc = new StreamingContext(conf, Seconds(3))
     //    val dStream = namedTextFileStream(ssc, "file:///home/tiger/distinct-data/data/") //local file
-    val dStream = namedTextFileStream(ssc, hdfs_path)
+    val dStream = namedTextFileStream(ssc, file_dir)
 
     def byFileTransformer(filename: String)(rdd: RDD[String]): RDD[(String, String)] =
       rdd.map(line => (filename, line))
