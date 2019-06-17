@@ -5,6 +5,7 @@ import com.dzyun.matches.util.ConstUtil;
 import com.dzyun.matches.dto.RowEntity;
 import com.dzyun.matches.util.LabelResult;
 import com.dzyun.matches.util.MsgException;
+//import com.dzyun.matches.util.ResultFormatter;
 import com.dzyun.matches.util.ResultFormatter;
 import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.conf.Configuration;
@@ -268,29 +269,7 @@ public class HBaseClient {
    * @param rows 批量插入数据实体
    * @param colFamily 列族
    */
-  /*public static void batchAddRow(String tableName, String colFamily, List<RowEntity> rows)
-      throws IOException {
-    if (StringUtils.isEmpty(colFamily)) {
-      colFamily = ConstUtil.COLUMNFAMILY_DEFAULT;
-    }
-    if (!CollectionUtils.isEmpty(rows)) {
-      Table table = conn.getTable(TableName.valueOf(tableName));
-      List<Put> list = new ArrayList<>();
-      for (RowEntity row : rows) {
-        if (MapUtils.isNotEmpty(row.getEntity())) {
-          Put put = new Put(Bytes.toBytes(row.getRowKey()));
-          Map<String, Object> map = row.getEntity();
 
-          for (Entry<String, Object> e : map.entrySet()) {
-            put.addColumn(Bytes.toBytes(colFamily), Bytes.toBytes(e.getKey()),
-                Bytes.toBytes(e.getValue().toString()));
-          }
-          list.add(put);
-        }
-      }
-      table.put(list);
-    }
-  }*/
   public static void batchAdd(String tableName, String colFamily, List<RowEntity> rows)
       throws IOException {
     if (StringUtils.isEmpty(colFamily)) {
@@ -333,17 +312,17 @@ public class HBaseClient {
    * @param tableName 表名
    * @param rowKeys 行健
    */
-//  public void batchDeleteRow(String tableName, Collection<String> rowKeys, long timestamp)
-//      throws IOException {
-//    List<Delete> deletes = new ArrayList<>();
-//    Table table = conn.getTable(TableName.valueOf(tableName));
-//    for (String rowKey : rowKeys) {
-//      Delete delete = new Delete(Bytes.toBytes(rowKey));
-//      delete.addFamilyVersion(Bytes.toBytes(ConstUtil.COLUMNFAMILY_DEFAULT), timestamp);
-//      deletes.add(delete);
-//    }
-//    table.delete(deletes);
-//  }
+  public void batchDeleteRow(String tableName, Collection<String> rowKeys, long timestamp)
+      throws IOException {
+    List<Delete> deletes = new ArrayList<>();
+    Table table = conn.getTable(TableName.valueOf(tableName));
+    for (String rowKey : rowKeys) {
+      Delete delete = new Delete(Bytes.toBytes(rowKey));
+      delete.addFamilyVersion(Bytes.toBytes(ConstUtil.COLUMNFAMILY_DEFAULT), timestamp);
+      deletes.add(delete);
+    }
+    table.delete(deletes);
+  }
 
   /**
    * 精确到列的检索
