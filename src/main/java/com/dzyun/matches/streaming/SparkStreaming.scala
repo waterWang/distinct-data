@@ -80,11 +80,11 @@ object SparkStreaming {
       rdd.map(line => (filename, line))
 
     val data = dStream.transform(rdd => transformByFile(rdd, byFileTransformer))
-    data.print(5)
     log.info("=============start streaming==============")
     val start = System.currentTimeMillis()
     if (null != data) {
       data.foreachRDD(rdd => {
+        rdd.take(10).foreach(println)
         val hives: java.util.List[MsgEntity] = null
         val hbases: java.util.List[RowEntity] = null
         rdd.foreach(s => {
