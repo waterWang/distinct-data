@@ -86,17 +86,20 @@ object SparkStreaming {
       log.warn("=============start streaming==============")
       val start = System.currentTimeMillis()
       data.foreachRDD(rdd => {
-        rdd.take(3).foreach(println)
+        //        rdd.take(3).foreach(println)
         val hives: java.util.List[MsgEntity] = new util.ArrayList[MsgEntity]()
         val hbases: java.util.List[RowEntity] = new util.ArrayList[RowEntity]()
+        log.warn("=============start foreach==============")
+        System.err.println("+++++++++++++start foreach+++++++++++++")
+        Console.println("--------start foreach-------")
         rdd.foreach(s => {
 
           val filename = s._1.split(file_name_regex)(0)
           val line = s._2
           val arr = line.split(line_regex)
-          log.error("==========================="+filename)
-          System.err.println("++++++++++++++++++++++++++"+line)
-          Console.println("---------------"+line)
+          log.error("===========================" + filename)
+          System.err.println("++++++++++++++++++++++++++" + line)
+          Console.println("---------------" + line)
           if (arr.length >= 5) {
             val rowKey = ShaUtils.encrypt(arr(0), arr(1), arr(3), arr(4))
             if (!HBaseClient.existsRowKey(rowKey)) {
