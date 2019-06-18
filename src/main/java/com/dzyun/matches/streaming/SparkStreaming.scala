@@ -88,17 +88,12 @@ object SparkStreaming {
           var ss: (String, String) = null
           while (s.hasNext) {
             ss = s.next()
-            log.warn("=============start foreach==============")
             val filename = ss._1.split(file_name_regex)(0)
-            log.warn("===========================" + s.toString())
-            log.warn("===========================" + filename)
             val line = ss._2
             val arr = line.split(line_regex)
-
             if (arr.length >= 5) {
               val rowKey = ShaUtils.encrypt(arr(0), arr(1), arr(3), arr(4))
               if (!HBaseClient.existsRowKey(rowKey)) {
-                log.warn("insert line=" + line)
                 val hiveBean = new MsgEntity()
 
                 hiveBean.setPhone_id(arr(0))

@@ -272,6 +272,7 @@ public class HBaseClient {
 
   public static void batchAdd(String tableName, String colFamily, List<RowEntity> rows)
       throws IOException {
+    log.warn("start insert hbase===" + rows.size());
     if (StringUtils.isEmpty(colFamily)) {
       colFamily = ConstUtil.COLUMNFAMILY_DEFAULT;
     }
