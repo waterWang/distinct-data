@@ -29,12 +29,7 @@ object SparkStreaming {
   private val checkpoint_dir = "hdfs:///user/tiger/test"
   //  private val file_dir = "file:///home/tiger/distinct-data/data/"
 
-  /**
-    * https://spark.apache.org/docs/2.2.0/streaming-programming-guide.html#checkpointing
-    * Create spark streamingContext function for getOrCreate method
-    */
   def createContext(): StreamingContext = {
-
     val conf = new SparkConf().setAppName("distinct-data").setMaster("yarn")
     val ssc = new StreamingContext(conf, Seconds(10))
     ssc.checkpoint(checkpoint_dir)
@@ -70,8 +65,8 @@ object SparkStreaming {
   }
 
   def main(args: Array[String]): Unit = {
-//    val conf = new SparkConf().setAppName("distinct-data").setMaster("yarn")
-//    val ssc = new StreamingContext(conf, Seconds(3))
+    //    val conf = new SparkConf().setAppName("distinct-data").setMaster("yarn")
+    //    val ssc = new StreamingContext(conf, Seconds(3))
     val ssc = StreamingContext.getOrCreate(checkpoint_dir, createContext _)
     val dStream = namedTextFileStream(ssc, file_dir)
 
@@ -84,11 +79,12 @@ object SparkStreaming {
       log.warn("=============start streaming==============")
       val start = System.currentTimeMillis()
       data.foreachRDD(rdd => {
-        rdd.take(3).foreach(println)
         val hives: java.util.List[MsgEntity] = new util.ArrayList[MsgEntity]()
         val hbases: java.util.List[RowEntity] = new util.ArrayList[RowEntity]()
-        log.warn("=============ready foreach==============")
+        rdd.take(3).foreach(println)
+        log.warn("=============ready foreach==============" + rdd.count())
         rdd.foreachPartition(s => {
+          log.warn("=============in foreach==============")
           var ss: (String, String) = null
           while (s.hasNext) {
             ss = s.next()
