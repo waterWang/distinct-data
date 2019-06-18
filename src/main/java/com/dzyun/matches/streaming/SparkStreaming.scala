@@ -73,7 +73,7 @@ object SparkStreaming {
   def main(args: Array[String]) = {
     val conf = new SparkConf().setAppName("distinct-data").setMaster("yarn")
     val ssc = new StreamingContext(conf, Seconds(3))
-
+    ssc.sparkContext.setLogLevel("WARN")
     //    val ssc = StreamingContext.getOrCreate(checkpoint_dir, createContext _)
     val dStream = namedTextFileStream(ssc, file_dir)
 
@@ -121,6 +121,7 @@ object SparkStreaming {
           }
         })
         if (!hbases.isEmpty) {
+          log.warn("============start insert==========")
           HBaseClient.batchAdd(hbases)
           HiveClient.batchAdd(hives)
         }
