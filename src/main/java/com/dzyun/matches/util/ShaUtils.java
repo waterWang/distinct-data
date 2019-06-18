@@ -36,7 +36,7 @@ public class ShaUtils {
     sb.append(s2);
     sb.append(s3);
     sb.append(s4);
-    return sb.toString();
+    return evaluate(sb.toString());
   }
 
   public static String encrypt(String[] arr) {
