@@ -25,7 +25,7 @@ object SparkStreaming {
   private val line_regex = "\t"
   private val file_name_regex = "\\."
   //  private val hdfs_path = YamlUtil.getPatam("hdfsPath")
-  private val file_dir = "hdfs://nameservice2/user/tiger/origin_data_files_test/"
+  private val file_dir = "hdfs://user/tiger/origin_data_files_test/"
   private val checkpoint_dir = "hdfs:///user/tiger/test"
   //  private val file_dir = "file:///home/tiger/distinct-data/data/"
 
@@ -36,7 +36,7 @@ object SparkStreaming {
   def createContext(): StreamingContext = {
 
     val conf = new SparkConf().setAppName("distinct-data").setMaster("yarn")
-    val ssc = new StreamingContext(conf, Seconds(3))
+    val ssc = new StreamingContext(conf, Seconds(10))
     ssc.checkpoint(checkpoint_dir)
     ssc.sparkContext.setLogLevel("WARN")
     ssc
