@@ -95,6 +95,7 @@ object SparkStreaming {
           val line = s._2
           log.warn("============line=" + line)
           val arr = line.split(line_regex)
+          log.error("==========================="+filename)
           if (arr.length >= 5) {
             val rowKey = ShaUtils.encrypt(arr(0), arr(1), arr(3), arr(4))
             if (!HBaseClient.existsRowKey(rowKey)) {
