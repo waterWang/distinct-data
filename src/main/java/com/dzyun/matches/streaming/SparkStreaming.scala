@@ -7,7 +7,6 @@ import com.dzyun.matches.dto.{MsgEntity, RowEntity}
 import com.dzyun.matches.hbase.HBaseClient
 import com.dzyun.matches.hive.HiveClient
 import com.dzyun.matches.util.{DateUtils, ShaUtils}
-import org.apache.commons.lang3.StringUtils
 import org.apache.hadoop.io.{LongWritable, Text}
 import org.apache.hadoop.mapreduce.lib.input.TextInputFormat
 import org.apache.spark.SparkConf
@@ -26,7 +25,7 @@ object SparkStreaming {
   private val line_regex = "\t"
   private val file_name_regex = "\\."
   //  private val hdfs_path = YamlUtil.getPatam("hdfsPath")
-  private val file_dir = "hdfs:///user/tiger/origin_data_files_test/"
+  private val file_dir = "hdfs://nameservice2/user/tiger/origin_data_files_test/"
   private val checkpoint_dir = "hdfs:///user/tiger/test"
   //  private val file_dir = "file:///home/tiger/distinct-data/data/"
 
@@ -55,7 +54,7 @@ object SparkStreaming {
 
   def transformByFile[U: ClassTag](rdd: RDD[String], func: String => RDD[String] => RDD[U]): RDD[U] = {
     new UnionRDD(rdd.context,
-      rdd.dependencies.map { dep =>
+      rdd.dependencies.flatMap { dep =>
         if (dep.rdd.isEmpty) None
         else {
           if (dep.rdd.name.endsWith(".tmp")) None
@@ -66,11 +65,11 @@ object SparkStreaming {
             )
           }
         }
-      }.flatten
+      }
     )
   }
 
-  def main(args: Array[String]) = {
+  def main(args: Array[String]): Unit = {
     val conf = new SparkConf().setAppName("distinct-data").setMaster("yarn")
     val ssc = new StreamingContext(conf, Seconds(3))
     //    ssc.sparkContext.setLogLevel("WARN")
