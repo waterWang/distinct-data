@@ -25,7 +25,7 @@ object SparkStreaming {
   private val line_regex = "\t"
   private val file_name_regex = "\\."
   //  private val hdfs_path = YamlUtil.getPatam("hdfsPath")
-  private val file_dir = "hdfs://user/tiger/origin_data_files_test/"
+  private val file_dir = "hdfs:///user/tiger/origin_data_files_test/"
   private val checkpoint_dir = "hdfs:///user/tiger/test"
   //  private val file_dir = "file:///home/tiger/distinct-data/data/"
 
@@ -70,10 +70,9 @@ object SparkStreaming {
   }
 
   def main(args: Array[String]): Unit = {
-    val conf = new SparkConf().setAppName("distinct-data").setMaster("yarn")
-    val ssc = new StreamingContext(conf, Seconds(3))
-    //    ssc.sparkContext.setLogLevel("WARN")
-    //    val ssc = StreamingContext.getOrCreate(checkpoint_dir, createContext _)
+//    val conf = new SparkConf().setAppName("distinct-data").setMaster("yarn")
+//    val ssc = new StreamingContext(conf, Seconds(3))
+    val ssc = StreamingContext.getOrCreate(checkpoint_dir, createContext _)
     val dStream = namedTextFileStream(ssc, file_dir)
 
     def byFileTransformer(filename: String)(rdd: RDD[String]): RDD[(String, String)] =
@@ -85,43 +84,80 @@ object SparkStreaming {
       log.warn("=============start streaming==============")
       val start = System.currentTimeMillis()
       data.foreachRDD(rdd => {
-        //        rdd.take(3).foreach(println)
+        rdd.take(3).foreach(println)
         val hives: java.util.List[MsgEntity] = new util.ArrayList[MsgEntity]()
         val hbases: java.util.List[RowEntity] = new util.ArrayList[RowEntity]()
         log.warn("=============ready foreach==============")
-        rdd.foreach(s => {
-          log.warn("=============start foreach==============")
-          val filename = s._1.split(file_name_regex)(0)
-          log.warn("===========================" + s.toString())
-          log.warn("===========================" + filename)
-          val line = s._2
-          val arr = line.split(line_regex)
+        rdd.foreachPartition(s => {
+          var ss: (String, String) = null
+          while (s.hasNext) {
+            ss = s.next()
+            log.warn("=============start foreach==============")
+            val filename = ss._1.split(file_name_regex)(0)
+            log.warn("===========================" + s.toString())
+            log.warn("===========================" + filename)
+            val line = ss._2
+            val arr = line.split(line_regex)
 
-          if (arr.length >= 5) {
-            val rowKey = ShaUtils.encrypt(arr(0), arr(1), arr(3), arr(4))
-            if (!HBaseClient.existsRowKey(rowKey)) {
-              log.warn("insert line=" + line)
-              val hiveBean = new MsgEntity()
+            if (arr.length >= 5) {
+              val rowKey = ShaUtils.encrypt(arr(0), arr(1), arr(3), arr(4))
+              if (!HBaseClient.existsRowKey(rowKey)) {
+                log.warn("insert line=" + line)
+                val hiveBean = new MsgEntity()
 
-              hiveBean.setPhone_id(arr(0))
-              hiveBean.setCreate_time(str2Long(arr(1)))
-              hiveBean.setApp_name(arr(2))
-              hiveBean.setMain_call_no(arr(3))
-              hiveBean.setMsg(arr(4))
-              hiveBean.setThe_date(DateUtils.strToDateFormat(filename.split("_")(0).substring(2)))
-              hiveBean.setFile_no(filename)
+                hiveBean.setPhone_id(arr(0))
+                hiveBean.setCreate_time(str2Long(arr(1)))
+                hiveBean.setApp_name(arr(2))
+                hiveBean.setMain_call_no(arr(3))
+                hiveBean.setMsg(arr(4))
+                hiveBean.setThe_date(DateUtils.strToDateFormat(filename.split("_")(0).substring(2)))
+                hiveBean.setFile_no(filename)
 
-              val hbaseBean = new RowEntity()
-              hbaseBean.setRowKey(rowKey)
-              hbaseBean.setCol(colName)
-              hbaseBean.setValue(filename)
-              hives.add(hiveBean)
-              hbases.add(hbaseBean)
-            } else {
-              log.warn("not insert filename=" + filename + " line=" + line)
+                val hbaseBean = new RowEntity()
+                hbaseBean.setRowKey(rowKey)
+                hbaseBean.setCol(colName)
+                hbaseBean.setValue(filename)
+                hives.add(hiveBean)
+                hbases.add(hbaseBean)
+              } else {
+                log.warn("not insert filename=" + filename + " line=" + line)
+              }
             }
           }
         })
+        //        rdd.foreach(s => {
+        //          log.warn("=============start foreach==============")
+        //          var filename = s._1.split(file_name_regex)(0)
+        //          log.warn("===========================" + s.toString())
+        //          log.warn("===========================" + filename)
+        //          var line = s._2
+        //          var arr = line.split(line_regex)
+        //
+        //          if (arr.length >= 5) {
+        //            var rowKey = ShaUtils.encrypt(arr(0), arr(1), arr(3), arr(4))
+        //            if (!HBaseClient.existsRowKey(rowKey)) {
+        //              log.warn("insert line=" + line)
+        //              var hiveBean = new MsgEntity()
+        //
+        //              hiveBean.setPhone_id(arr(0))
+        //              hiveBean.setCreate_time(str2Long(arr(1)))
+        //              hiveBean.setApp_name(arr(2))
+        //              hiveBean.setMain_call_no(arr(3))
+        //              hiveBean.setMsg(arr(4))
+        //              hiveBean.setThe_date(DateUtils.strToDateFormat(filename.split("_")(0).substring(2)))
+        //              hiveBean.setFile_no(filename)
+        //
+        //              var hbaseBean = new RowEntity()
+        //              hbaseBean.setRowKey(rowKey)
+        //              hbaseBean.setCol(colName)
+        //              hbaseBean.setValue(filename)
+        //              hives.add(hiveBean)
+        //              hbases.add(hbaseBean)
+        //            } else {
+        //              log.warn("not insert filename=" + filename + " line=" + line)
+        //            }
+        //          }
+        //        })
         if (!hbases.isEmpty) {
           log.warn("============start insert==========")
           HBaseClient.batchAdd(hbases)
