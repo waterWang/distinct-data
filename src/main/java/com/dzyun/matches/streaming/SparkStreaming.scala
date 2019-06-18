@@ -73,7 +73,7 @@ object SparkStreaming {
   def main(args: Array[String]) = {
     val conf = new SparkConf().setAppName("distinct-data").setMaster("yarn")
     val ssc = new StreamingContext(conf, Seconds(3))
-    ssc.sparkContext.setLogLevel("WARN")
+    //    ssc.sparkContext.setLogLevel("WARN")
     //    val ssc = StreamingContext.getOrCreate(checkpoint_dir, createContext _)
     val dStream = namedTextFileStream(ssc, file_dir)
 
@@ -89,17 +89,15 @@ object SparkStreaming {
         //        rdd.take(3).foreach(println)
         val hives: java.util.List[MsgEntity] = new util.ArrayList[MsgEntity]()
         val hbases: java.util.List[RowEntity] = new util.ArrayList[RowEntity]()
-        log.warn("=============start foreach==============")
-        System.err.println("+++++++++++++start foreach+++++++++++++")
-        Console.println("--------start foreach-------")
+        log.warn("=============ready foreach==============")
         rdd.foreach(s => {
-
+          log.warn("=============start foreach==============")
           val filename = s._1.split(file_name_regex)(0)
+          log.warn("===========================" + s.toString())
+          log.warn("===========================" + filename)
           val line = s._2
           val arr = line.split(line_regex)
-          log.error("===========================" + filename)
-          System.err.println("++++++++++++++++++++++++++" + line)
-          Console.println("---------------" + line)
+
           if (arr.length >= 5) {
             val rowKey = ShaUtils.encrypt(arr(0), arr(1), arr(3), arr(4))
             if (!HBaseClient.existsRowKey(rowKey)) {
