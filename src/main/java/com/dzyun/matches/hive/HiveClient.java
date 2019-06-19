@@ -30,12 +30,17 @@ public class HiveClient implements Serializable {
   static {
     spark = SparkSession
         .builder()
-        .appName("Java Spark Hive Example")
+        .appName("Java Spark Hive")
         .master("yarn")
         .enableHiveSupport()
         .getOrCreate();
-    spark.sqlContext().setConf("hive.exec.dynamic.partition", "true");
-    spark.sqlContext().setConf("hive.exec.dynamic.partition.mode", "nonstrict");
+//    spark.sqlContext().setConf("hive.exec.dynamic.partition", "true");
+//    spark.sqlContext().setConf("hive.exec.dynamic.partition.mode", "nonstrict");
+    spark.sqlContext().sql("set hive.exec.dynamic.partition=true");
+    spark.sqlContext().sql("set hive.exec.dynamic.partition.mode=nonstrict");
+//    spark.sqlContext().sql("insert overwrite table hive_test.query_result_info  partition(dt) " +
+//        "select query, code, info, $dt " +
+//        "from queryResultTempTable ");
   }
 
   public static void batchAdd(List<MsgEntity> msgs) {
@@ -49,8 +54,9 @@ public class HiveClient implements Serializable {
   }
 
   public static void main(String[] args) {
+    Long len = Long.parseLong(args[0]);
     List<MsgEntity> msgs = new ArrayList<>();
-    for (int i = 0; i < 400000; i++) {
+    for (int i = 0; i < len; i++) {
       MsgEntity bean = new MsgEntity("861832882276" + i, 156000878L + i,
           "爱又米", "95555", "尊敬的xxx",
           "2019-06-06", "L120190606_123");
