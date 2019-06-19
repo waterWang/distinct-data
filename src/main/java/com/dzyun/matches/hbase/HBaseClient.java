@@ -7,6 +7,7 @@ import com.dzyun.matches.util.LabelResult;
 import com.dzyun.matches.util.MsgException;
 //import com.dzyun.matches.util.ResultFormatter;
 import com.dzyun.matches.util.ResultFormatter;
+import java.io.Serializable;
 import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HBaseConfiguration;
@@ -35,7 +36,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Hbase 通用接口
  */
-public class HBaseClient {
+public class HBaseClient implements Serializable {
 
   private static final Logger log = LoggerFactory.getLogger(HBaseClient.class);
 

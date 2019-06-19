@@ -1,7 +1,7 @@
 package com.dzyun.matches.hive;
 
 import com.dzyun.matches.dto.MsgEntity;
-import java.util.ArrayList;
+import java.io.Serializable;
 import java.util.Arrays;
 import java.util.List;
 import org.apache.spark.sql.Dataset;
@@ -12,7 +12,7 @@ import org.slf4j.LoggerFactory;
 import scala.collection.JavaConverters;
 import scala.collection.Seq;
 
-public class HiveClient {
+public class HiveClient implements Serializable {
 
   private static final Logger log = LoggerFactory.getLogger(HiveClient.class);
   private static SparkSession spark;
