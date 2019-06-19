@@ -64,19 +64,19 @@ public class HBaseClient {
   }
 
 
-  public static void main(String[] args) {
-
-    List<RowEntity> rows = new ArrayList<>();
-    for (int i = 0; i < 10; i++) {
-      rows.add(new RowEntity("rowKey" + i, colName, "value" + i));
-    }
-    try {
-      batchAdd(rows);
-      System.out.println(existsRowKey("rowKey5"));
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
-  }
+//  public static void main(String[] args) {
+//
+//    List<RowEntity> rows = new ArrayList<>();
+//    for (int i = 0; i < 10; i++) {
+//      rows.add(new RowEntity("rowKey" + i, "value" + i));
+//    }
+//    try {
+//      batchAdd(rows);
+//      System.out.println(existsRowKey("rowKey5"));
+//    } catch (Exception e) {
+//      e.printStackTrace();
+//    }
+//  }
 
   /**
    * 功能描述：关闭连接
@@ -262,15 +262,15 @@ public class HBaseClient {
     table.put(put);
   }
 
-  /**
-   * 给指定的表批量添加数据
-   *
-   * @param tableName 表名
-   * @param rows 批量插入数据实体
-   * @param colFamily 列族
-   */
+//  /**
+//   * 给指定的表批量添加数据
+//   *
+//   * @param tableName 表名
+//   * @param rows 批量插入数据实体
+//   * @param colFamily 列族
+//   */
 
-  public static void batchAdd(String tableName, String colFamily, List<RowEntity> rows)
+  /*public static void batchAdd(String tableName, String colFamily, List<RowEntity> rows)
       throws IOException {
     log.warn("start insert hbase===" + rows.size());
     if (StringUtils.isEmpty(colFamily)) {
@@ -279,19 +279,43 @@ public class HBaseClient {
     if (!CollectionUtils.isEmpty(rows)) {
       Table table = conn.getTable(TableName.valueOf(tableName));
       List<Put> puts = new ArrayList<>();
+      byte[] colBytes = Bytes.toBytes(colFamily);
       for (RowEntity row : rows) {
         Put put = new Put(Bytes.toBytes(row.getRowKey()));
-        put.addColumn(Bytes.toBytes(colFamily), Bytes.toBytes(row.getCol()),
-            Bytes.toBytes(row.getValue()));
+        put.addColumn(colBytes, colBytes, Bytes.toBytes(row.getValue()));
         puts.add(put);
       }
       table.put(puts);
     }
+  }*/
+
+  public static void batchAdd(String tableName, String colFamily, List<String> rowKeys,
+      String value)
+      throws IOException {
+    log.warn("start insert hbase===" + rowKeys.size());
+    if (StringUtils.isEmpty(colFamily)) {
+      colFamily = ConstUtil.COLUMNFAMILY_DEFAULT;
+    }
+    Table table = conn.getTable(TableName.valueOf(tableName));
+    List<Put> puts = new ArrayList<>();
+    byte[] colBytes = Bytes.toBytes(colFamily);
+    byte[] valueBytes = Bytes.toBytes(value);
+    for (String rowKey : rowKeys) {
+      Put put = new Put(Bytes.toBytes(rowKey));
+      put.addColumn(colBytes, colBytes, valueBytes);
+      puts.add(put);
+    }
+    table.put(puts);
   }
 
-  public static void batchAdd(List<RowEntity> rows)
+//  public static void batchAdd(List<RowEntity> rows)
+//      throws IOException {
+//    batchAdd(tableName, colName, rows);
+//  }
+
+  public static void batchAdd(List<String> rowKeys, String value)
       throws IOException {
-    batchAdd(tableName, colName, rows);
+    batchAdd(tableName, colName, rowKeys, value);
   }
 
   /**

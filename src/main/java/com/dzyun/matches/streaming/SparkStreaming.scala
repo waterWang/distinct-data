@@ -75,22 +75,24 @@ object SparkStreaming {
         log.warn("===start streaming===")
         val start = System.currentTimeMillis()
         val hives: java.util.List[MsgEntity] = new util.ArrayList[MsgEntity]()
-        val hbases: java.util.List[RowEntity] = new util.ArrayList[RowEntity]()
+        val hbases: java.util.List[String] = new util.ArrayList[String]()
         rdd.take(3).foreach(println)
         val cnt = rdd.count()
+        var fileName: String = null
+        var row: String = null
+        var rowKey: String = null
+        var arr: Array[String] = null
         rdd.foreachPartition(tuple => {
-          log.warn("===in foreach===")
           var ss: (String, String) = null
           while (tuple.hasNext) {
             ss = tuple.next()
-            val fileName = ss._1
-            val row = ss._2
-            val arr = row.split(line_regex)
+            fileName = ss._1
+            row = ss._2
+            arr = row.split(line_regex)
             if (arr.length >= 5) {
-              val rowKey = ShaUtils.encrypt(arr(0), arr(1), arr(3), arr(4))
+              rowKey = ShaUtils.encrypt(arr(0), arr(1), arr(3), arr(4))
               if (!HBaseClient.existsRowKey(rowKey)) {
                 val hiveBean = new MsgEntity()
-
                 hiveBean.setPhone_id(arr(0))
                 hiveBean.setCreate_time(str2Long(arr(1)))
                 hiveBean.setApp_name(arr(2))
@@ -99,26 +101,21 @@ object SparkStreaming {
                 hiveBean.setThe_date(DateUtils.strToDateFormat(fileName.split("_")(0).substring(2)))
                 hiveBean.setFile_no(fileName)
 
-                val hbaseBean = new RowEntity()
-                hbaseBean.setRowKey(rowKey)
-                hbaseBean.setCol(colName)
-                hbaseBean.setValue(fileName)
                 hives.add(hiveBean)
-                hbases.add(hbaseBean)
+                hbases.add(rowKey)
               } else {
                 log.warn("not insert fileName=" + fileName + " row=" + row)
               }
             }
           }
-          log.warn("===over foreach===")
           if (!hbases.isEmpty) {
-            log.warn("===start batch insert,cnt is {}",hbases.size())
-            HBaseClient.batchAdd(hbases)
+            log.warn("===start batch insert,cnt is {}", hbases.size())
+            HBaseClient.batchAdd(hbases, fileName)
             HiveClient.batchAdd(hives)
           }
         })
         val cost = System.currentTimeMillis() - start
-        log.warn("===end streaming,cost time is={},cnt is {}",cost / 1000,cnt)
+        log.warn("===end streaming,cost time is {}s,row cnt is {}", cost / 1000, cnt)
       })
 
     }

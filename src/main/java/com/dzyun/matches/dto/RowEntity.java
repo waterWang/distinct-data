@@ -6,7 +6,6 @@ import java.io.Serializable;
 public class RowEntity implements Serializable {
 
   private String rowKey;
-  private String col;
   private String value;
 
   public String getRowKey() {
@@ -15,14 +14,6 @@ public class RowEntity implements Serializable {
 
   public void setRowKey(String rowKey) {
     this.rowKey = rowKey;
-  }
-
-  public String getCol() {
-    return col;
-  }
-
-  public void setCol(String col) {
-    this.col = col;
   }
 
   public String getValue() {
@@ -36,9 +27,8 @@ public class RowEntity implements Serializable {
   public RowEntity() {
   }
 
-  public RowEntity(String rowKey, String col, String value) {
+  public RowEntity(String rowKey, String value) {
     this.rowKey = rowKey;
-    this.col = col;
     this.value = value;
   }
 }
