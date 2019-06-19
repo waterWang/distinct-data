@@ -18,7 +18,7 @@ import org.slf4j.{Logger, LoggerFactory}
 import scala.reflect.ClassTag
 import scala.util.Success
 
-object SparkStreaming {
+object SparkStreaming extends java.io.Serializable{
 
   val log: Logger = LoggerFactory.getLogger(SparkStreaming.getClass)
   val colName = "file_no"
