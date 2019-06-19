@@ -63,7 +63,6 @@ public class HBaseClient {
     }
   }
 
-
 //  public static void main(String[] args) {
 //
 //    List<RowEntity> rows = new ArrayList<>();
@@ -292,7 +291,7 @@ public class HBaseClient {
   public static void batchAdd(String tableName, String colFamily, List<String> rowKeys,
       String value)
       throws IOException {
-    log.warn("start insert hbase===" + rowKeys.size());
+    log.warn("===start insert hbase===" + rowKeys.size());
     if (StringUtils.isEmpty(colFamily)) {
       colFamily = ConstUtil.COLUMNFAMILY_DEFAULT;
     }
@@ -315,7 +314,10 @@ public class HBaseClient {
 
   public static void batchAdd(List<String> rowKeys, String value)
       throws IOException {
+    Long start = System.currentTimeMillis();
     batchAdd(tableName, colName, rowKeys, value);
+    Long cost = System.currentTimeMillis() - start;
+    log.warn("===insert hbase cnt is {},cost time is {}", rowKeys.size(), cost);
   }
 
   /**
@@ -395,7 +397,6 @@ public class HBaseClient {
   public static Boolean existsRowKey(String tableName, String rowKey) {
     Table table;
     Get get = new Get(Bytes.toBytes(rowKey));
-    log.info("============rowKey=" + rowKey + "===tableName=" + tableName);
     get.setCheckExistenceOnly(true);
     Result result;
     try {

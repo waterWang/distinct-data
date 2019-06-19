@@ -39,9 +39,12 @@ public class HiveClient {
 
   public static void batchAdd(List<MsgEntity> msgs) {
     log.warn("start insert hive===" + msgs.size());
+    Long start = System.currentTimeMillis();
     Dataset<Row> ds = spark.createDataFrame(msgs, MsgEntity.class).toDF(cols);
     ds.write().mode("append").format("Hive").partitionBy("the_date", "file_no")
         .saveAsTable(tableName);
+    Long cost = System.currentTimeMillis() - start;
+    log.warn("===insert hive cnt is {},cost time is {}", msgs.size(), cost);
   }
 
 //  public static void main(String[] args) {
