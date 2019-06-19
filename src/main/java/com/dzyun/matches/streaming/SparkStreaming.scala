@@ -13,32 +13,30 @@ import org.apache.spark.SparkConf
 import org.apache.spark.rdd.{RDD, UnionRDD}
 import org.apache.spark.streaming.{Seconds, StreamingContext}
 import org.apache.spark.streaming.dstream.DStream
-import org.slf4j.LoggerFactory
+import org.slf4j.{Logger, LoggerFactory}
 
 import scala.reflect.ClassTag
 import scala.util.Success
 
 object SparkStreaming {
 
-  private val log = LoggerFactory.getLogger(SparkStreaming.getClass)
-  private val colName = "file_no"
-  private val line_regex = "\t"
-  private val file_name_regex = "\\."
+  val log: Logger = LoggerFactory.getLogger(SparkStreaming.getClass)
+  val colName = "file_no"
+  val line_regex = "\t"
+  val file_name_regex = "\\."
   //  private val hdfs_path = YamlUtil.getPatam("hdfsPath")
-  private val file_dir = "hdfs:///user/tiger/origin_data_files_test/"
-  private val checkpoint_dir = "hdfs:///user/tiger/test"
-  //  private val file_dir = "file:///home/tiger/distinct-data/data/"
+  val file_dir = "hdfs:///user/tiger/origin_data_files_test/"
+  val checkpoint_dir = "hdfs:///user/tiger/test" //"file:///home/tiger/distinct-data/data/"
 
   def createContext(): StreamingContext = {
-    val conf = new SparkConf().setAppName("distinct-data").setMaster("yarn")
+    val conf = new SparkConf().setAppName("org_txt_distinct").setMaster("yarn")
     val ssc = new StreamingContext(conf, Seconds(10))
     ssc.checkpoint(checkpoint_dir)
     ssc.sparkContext.setLogLevel("WARN")
     ssc
   }
 
-  def namedTextFileStream(ssc: StreamingContext, dir: String): DStream[String] =
-
+  def txtFileStream(ssc: StreamingContext, dir: String): DStream[String] =
     ssc.fileStream[LongWritable, Text, TextInputFormat](dir)
       .transform(rdd =>
         new UnionRDD(rdd.context, rdd.dependencies.map(dep =>
@@ -52,45 +50,42 @@ object SparkStreaming {
       rdd.dependencies.flatMap { dep =>
         if (dep.rdd.isEmpty) None
         else {
-          if (dep.rdd.name.endsWith(".tmp")) None
+          val path = dep.rdd.name
+          if (path.endsWith(".tmp")) None
           else {
-            val filename = new File(dep.rdd.name).getName
-            Some(
-              func(filename)(dep.rdd.asInstanceOf[RDD[String]]).setName(filename)
-            )
+            val fileName = new File(path).getName.split(".txt")(0)
+            Some(func(fileName)(dep.rdd.asInstanceOf[RDD[String]]).setName(fileName))
           }
         }
       }
     )
   }
 
+  def byFileTransformer(filename: String)(rdd: RDD[String]): RDD[(String, String)] =
+    rdd.map(line => (filename, line))
+
   def main(args: Array[String]): Unit = {
-    //    val conf = new SparkConf().setAppName("distinct-data").setMaster("yarn")
-    //    val ssc = new StreamingContext(conf, Seconds(3))
-    val ssc = StreamingContext.getOrCreate(checkpoint_dir, createContext _)
-    val dStream = namedTextFileStream(ssc, file_dir)
-
-    def byFileTransformer(filename: String)(rdd: RDD[String]): RDD[(String, String)] =
-      rdd.map(line => (filename, line))
-
+    val ssc = StreamingContext.getOrCreate(checkpoint_dir, createContext)
+    val dStream = txtFileStream(ssc, file_dir)
     val data = dStream.transform(rdd => transformByFile(rdd, byFileTransformer))
 
     if (null != data) {
-      log.warn("=============start streaming==============")
-      val start = System.currentTimeMillis()
+
       data.foreachRDD(rdd => {
+        log.warn("===start streaming===")
+        val start = System.currentTimeMillis()
         val hives: java.util.List[MsgEntity] = new util.ArrayList[MsgEntity]()
         val hbases: java.util.List[RowEntity] = new util.ArrayList[RowEntity]()
         rdd.take(3).foreach(println)
-        log.warn("=============ready foreach==============" + rdd.count())
-        rdd.foreachPartition(s => {
-          log.warn("=============in foreach==============")
+        val cnt = rdd.count()
+        rdd.foreachPartition(tuple => {
+          log.warn("===in foreach===")
           var ss: (String, String) = null
-          while (s.hasNext) {
-            ss = s.next()
-            val filename = ss._1.split(file_name_regex)(0)
-            val line = ss._2
-            val arr = line.split(line_regex)
+          while (tuple.hasNext) {
+            ss = tuple.next()
+            val fileName = ss._1
+            val row = ss._2
+            val arr = row.split(line_regex)
             if (arr.length >= 5) {
               val rowKey = ShaUtils.encrypt(arr(0), arr(1), arr(3), arr(4))
               if (!HBaseClient.existsRowKey(rowKey)) {
@@ -101,30 +96,31 @@ object SparkStreaming {
                 hiveBean.setApp_name(arr(2))
                 hiveBean.setMain_call_no(arr(3))
                 hiveBean.setMsg(arr(4))
-                hiveBean.setThe_date(DateUtils.strToDateFormat(filename.split("_")(0).substring(2)))
-                hiveBean.setFile_no(filename)
+                hiveBean.setThe_date(DateUtils.strToDateFormat(fileName.split("_")(0).substring(2)))
+                hiveBean.setFile_no(fileName)
 
                 val hbaseBean = new RowEntity()
                 hbaseBean.setRowKey(rowKey)
                 hbaseBean.setCol(colName)
-                hbaseBean.setValue(filename)
+                hbaseBean.setValue(fileName)
                 hives.add(hiveBean)
                 hbases.add(hbaseBean)
               } else {
-                log.warn("not insert filename=" + filename + " line=" + line)
+                log.warn("not insert fileName=" + fileName + " row=" + row)
               }
             }
           }
-          log.warn("=============over foreach==============")
+          log.warn("===over foreach===")
           if (!hbases.isEmpty) {
-            log.warn("============start insert==========")
+            log.warn("===start batch insert,cnt is {}",hbases.size())
             HBaseClient.batchAdd(hbases)
             HiveClient.batchAdd(hives)
           }
         })
+        val cost = System.currentTimeMillis() - start
+        log.warn("===end streaming,cost time is={},cnt is {}",cost / 1000,cnt)
       })
-      val cost = System.currentTimeMillis() - start
-      log.warn("=============end streaming,cost time is==============" + cost / 1000)
+
     }
     ssc.start()
     ssc.awaitTermination()
