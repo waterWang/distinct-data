@@ -1,0 +1,54 @@
+======prod======
+
+dz-prod-dc1-web1
+tiger:Mq64FbaU1Xp3g5PA
+root:3EvtxZxwVfL4GkWJD0
+
+
+
+dz-prod-dc1-hadoop1
+root  gPf0iVFsbRj6l9OR
+tiger  tgUN91Ywp4OFZBSv
+
+
+dz-prod-dc1-hadoop2
+tiger  tgUN91Ywp4OFZBSv
+root huemasker)(*7
+
+
+dz-prod-dc1-hadoop3
+tiger  tgUN91Ywp4OFZBSv
+root gPf0iVFsbRj6l9OR
+
+
+
+dz-prod-dc1-hadoop4
+root IwmfTMgeD65ustIX
+tiger tigerwuzz
+
+
+dz-prod-dc1-hadoop5
+root IwmfTMgeD65ustIX
+tiger tigerwuzz
+
+
+dz-prod-dc1-hadoop6
+root IwmfTMgeD65ustIX
+tiger tigerwuzz
+
+
+dz-prod-dc1-hadoop7
+root aW0zq2faxHG3mBQn
+tiger hadooptiger
+
+dz-prod-dc1-hadoop8
+root aW0zq2faxHG3mBQn
+tiger hadooptiger
+
+dz-prod-dc1-hadoop9
+root aW0zq2faxHG3mBQn
+tiger hadooptiger
+
+dz-prod-dc1-hadoop10
+root aW0zq2faxHG3mBQn
+tiger hadooptiger
