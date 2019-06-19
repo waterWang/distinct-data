@@ -79,19 +79,20 @@ object SparkStreaming {
         val hbases: java.util.List[String] = new util.ArrayList[String]()
         rdd.take(3).foreach(println)
         val cnt = rdd.count()
-        var fileName: String = null
-        var row: String = null
-        var rowKey: String = null
-        var arr: Array[String] = null
+        //        var fileName: String = null
+        //        var row: String = null
+        //        var rowKey: String = null
+        //        var arr: Array[String] = null
         rdd.foreachPartition(tuple => {
+          val fileName = tuple.next()._1
           var ss: (String, String) = null
           while (tuple.hasNext) {
             ss = tuple.next()
-            fileName = ss._1
-            row = ss._2
-            arr = row.split(line_regex)
+//            val fileName = ss._1
+            val row = ss._2
+            val arr = row.split(line_regex)
             if (arr.length >= 5) {
-              rowKey = ShaUtils.encrypt(arr(0), arr(1), arr(3), arr(4))
+              val rowKey = ShaUtils.encrypt(arr(0), arr(1), arr(3), arr(4))
               if (!HBaseClient.existsRowKey(rowKey)) {
                 val hiveBean = new MsgEntity()
                 hiveBean.setPhone_id(arr(0))
