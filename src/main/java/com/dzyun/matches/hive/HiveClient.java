@@ -43,8 +43,8 @@ public class HiveClient {
     Dataset<Row> ds = spark.createDataFrame(msgs, MsgEntity.class).toDF(cols);
     ds.write().mode("append").format("Hive").partitionBy("the_date", "file_no")
         .saveAsTable(tableName);
-    Long cost = System.currentTimeMillis() - start;
-    log.warn("===insert hive cnt is {},cost time is {}", msgs.size(), cost);
+    Long cost = (System.currentTimeMillis() - start) / 1000;
+    log.warn("===insert hive cnt is {},cost time is {}s", msgs.size(), cost);
   }
 
 //  public static void main(String[] args) {

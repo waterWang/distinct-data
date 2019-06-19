@@ -316,8 +316,8 @@ public class HBaseClient {
       throws IOException {
     Long start = System.currentTimeMillis();
     batchAdd(tableName, colName, rowKeys, value);
-    Long cost = System.currentTimeMillis() - start;
-    log.warn("===insert hbase cnt is {},cost time is {}", rowKeys.size(), cost);
+    Long cost = (System.currentTimeMillis() - start) / 1000;
+    log.warn("===insert hbase cnt is {},cost time is {}s", rowKeys.size(), cost);
   }
 
   /**

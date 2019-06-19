@@ -30,6 +30,7 @@ object SparkStreaming {
 
   def createContext(): StreamingContext = {
     val conf = new SparkConf().setAppName("org_txt_distinct").setMaster("yarn")
+      .set("spark.serializer", "org.apache.spark.serializer.KryoSerializer")
     val ssc = new StreamingContext(conf, Seconds(10))
     ssc.checkpoint(checkpoint_dir)
     ssc.sparkContext.setLogLevel("WARN")
