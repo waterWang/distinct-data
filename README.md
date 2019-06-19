@@ -28,6 +28,9 @@ spark-submit --class com.dzyun.matches.hbase.HBaseClient --master yarn /home/tig
 
 spark-submit --class com.dzyun.matches.hive.HiveClient --master yarn /home/tiger/distinct-data/target/distinct-data-1.0-SNAPSHOT-jar-with-dependencies.jar
 
+spark-submit --class com.dzyun.matches.streaming.SparkStreaming --master yarn --queue root.file_to_dz /home/tiger/distinct-data/target/distinct-data-1.0-SNAPSHOT-jar-with-dependencies.jar
+
+
 mvn clean assembly:assembly -DskipTests
 
 

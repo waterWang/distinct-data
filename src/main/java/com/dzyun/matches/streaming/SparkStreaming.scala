@@ -115,50 +115,17 @@ object SparkStreaming {
               }
             }
           }
+          log.warn("=============over foreach==============")
+          if (!hbases.isEmpty) {
+            log.warn("============start insert==========")
+            HBaseClient.batchAdd(hbases)
+            HiveClient.batchAdd(hives)
+          }
         })
-        //        rdd.foreach(s => {
-        //          log.warn("=============start foreach==============")
-        //          var filename = s._1.split(file_name_regex)(0)
-        //          log.warn("===========================" + s.toString())
-        //          log.warn("===========================" + filename)
-        //          var line = s._2
-        //          var arr = line.split(line_regex)
-        //
-        //          if (arr.length >= 5) {
-        //            var rowKey = ShaUtils.encrypt(arr(0), arr(1), arr(3), arr(4))
-        //            if (!HBaseClient.existsRowKey(rowKey)) {
-        //              log.warn("insert line=" + line)
-        //              var hiveBean = new MsgEntity()
-        //
-        //              hiveBean.setPhone_id(arr(0))
-        //              hiveBean.setCreate_time(str2Long(arr(1)))
-        //              hiveBean.setApp_name(arr(2))
-        //              hiveBean.setMain_call_no(arr(3))
-        //              hiveBean.setMsg(arr(4))
-        //              hiveBean.setThe_date(DateUtils.strToDateFormat(filename.split("_")(0).substring(2)))
-        //              hiveBean.setFile_no(filename)
-        //
-        //              var hbaseBean = new RowEntity()
-        //              hbaseBean.setRowKey(rowKey)
-        //              hbaseBean.setCol(colName)
-        //              hbaseBean.setValue(filename)
-        //              hives.add(hiveBean)
-        //              hbases.add(hbaseBean)
-        //            } else {
-        //              log.warn("not insert filename=" + filename + " line=" + line)
-        //            }
-        //          }
-        //        })
-        if (!hbases.isEmpty) {
-          log.warn("============start insert==========")
-          HBaseClient.batchAdd(hbases)
-          HiveClient.batchAdd(hives)
-        }
       })
       val cost = System.currentTimeMillis() - start
       log.warn("=============end streaming,cost time is==============" + cost / 1000)
     }
-
     ssc.start()
     ssc.awaitTermination()
   }
