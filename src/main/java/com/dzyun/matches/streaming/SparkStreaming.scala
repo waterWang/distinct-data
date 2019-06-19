@@ -77,7 +77,7 @@ object SparkStreaming extends java.io.Serializable{
         val start = System.currentTimeMillis()
         val hives: java.util.List[MsgEntity] = new util.ArrayList[MsgEntity]()
         val hbases: java.util.List[String] = new util.ArrayList[String]()
-        rdd.take(3).foreach(println)
+//        rdd.take(3).foreach(println)
         val cnt = rdd.count()
         //        var fileName: String = null
         //        var row: String = null
