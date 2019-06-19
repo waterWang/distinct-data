@@ -1,5 +1,6 @@
 package com.dzyun.matches.util;
 
+import java.io.Serializable;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -8,7 +9,7 @@ import java.util.TimeZone;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.FastDateFormat;
 
-public class DateUtils {
+public class DateUtils implements Serializable {
 
   public static final FastDateFormat ISO_DATETIME_FORMAT = FastDateFormat
       .getInstance("yyyy-MM-dd'T'HH:mm:ss");

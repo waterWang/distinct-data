@@ -1,10 +1,11 @@
 package com.dzyun.matches.util;
 
+import java.io.Serializable;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import org.apache.commons.lang.StringUtils;
 
-public class ShaUtils {
+public class ShaUtils implements Serializable {
 
   public static String evaluate(final String str) {
     if (StringUtils.isBlank(str)) {

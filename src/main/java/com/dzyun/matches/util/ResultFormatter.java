@@ -1,5 +1,6 @@
 package com.dzyun.matches.util;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -14,7 +15,7 @@ import org.apache.hadoop.hbase.util.Bytes;
  * 描述：表查询数据封装
  * author qiaobin   2017/4/26 11:10.
  */
-public class ResultFormatter {
+public class ResultFormatter implements Serializable {
 
     //--------------------HBASE
     /**

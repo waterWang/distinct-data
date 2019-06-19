@@ -1,7 +1,9 @@
 package com.dzyun.matches.util;
 
 
-public class MsgException extends RuntimeException {
+import java.io.Serializable;
+
+public class MsgException extends RuntimeException implements Serializable {
 
   private static final long serialVersionUID = 209248116271894410L;
 

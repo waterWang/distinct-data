@@ -1,12 +1,13 @@
 package com.dzyun.matches.util;
 
+import java.io.Serializable;
 import java.util.Map;
 
 /**
  * 描述：数据实体
  * author qiaobin   2017/4/27 13:52.
  */
-public class Entity {
+public class Entity implements Serializable {
 
     //唯一主键
     private String rowKey;

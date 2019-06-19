@@ -1,12 +1,13 @@
 package com.dzyun.matches.util;
 
+import java.io.Serializable;
 import java.util.List;
 
 /**
  * 描述：数据集
  * author qiaobin   2017/4/25 16:34.
  */
-public class LabelResult {
+public class LabelResult implements Serializable {
 
     //数据源区分 （ES, HBASE）
     private String source;

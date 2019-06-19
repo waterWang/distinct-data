@@ -1,11 +1,12 @@
 package com.dzyun.matches.util;
 
 import java.io.FileInputStream;
+import java.io.Serializable;
 import java.net.URL;
 import java.util.Map;
 import org.yaml.snakeyaml.Yaml;
 
-public class YamlUtil {
+public class YamlUtil implements Serializable {
 
   public static String getPatam(String key) {
     return getPatam("../../../../app-prod.yml", key);
