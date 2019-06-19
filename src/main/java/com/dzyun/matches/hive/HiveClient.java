@@ -2,6 +2,7 @@ package com.dzyun.matches.hive;
 
 import com.dzyun.matches.dto.MsgEntity;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import org.apache.spark.sql.Dataset;
@@ -47,16 +48,16 @@ public class HiveClient implements Serializable {
     log.warn("===insert hive cnt is {},cost time is {}s", msgs.size(), cost);
   }
 
-//  public static void main(String[] args) {
-//    List<MsgEntity> msgs = new ArrayList<>();
-//    for (int i = 0; i < 10; i++) {
-//      MsgEntity bean = new MsgEntity("861832882276" + i, 156000878L + i,
-//          "爱又米", "95555", "尊敬的xxx",
-//          "2019-06-06", "L120190606_123");
-//      msgs.add(bean);
-//    }
-//    batchAdd(msgs);
-//  }
+  public static void main(String[] args) {
+    List<MsgEntity> msgs = new ArrayList<>();
+    for (int i = 0; i < 400000; i++) {
+      MsgEntity bean = new MsgEntity("861832882276" + i, 156000878L + i,
+          "爱又米", "95555", "尊敬的xxx",
+          "2019-06-06", "L120190606_123");
+      msgs.add(bean);
+    }
+    batchAdd(msgs);
+  }
 
 
 }
