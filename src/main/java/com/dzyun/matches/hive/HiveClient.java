@@ -39,8 +39,6 @@ public class HiveClient implements Serializable {
         .master("yarn")
         .enableHiveSupport()
         .getOrCreate();
-//    spark.sqlContext().setConf("hive.exec.dynamic.partition", "true");
-//    spark.sqlContext().setConf("hive.exec.dynamic.partition.mode", "nonstrict");
     spark.sqlContext().sql("set hive.exec.dynamic.partition=true");
     spark.sqlContext().sql("set hive.exec.dynamic.partition.mode=nonstrict");
     spark.sqlContext().sparkContext().setLogLevel("warn");
