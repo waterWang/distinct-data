@@ -141,7 +141,7 @@ object SparkStreaming extends java.io.Serializable {
           if (!rdd.isEmpty()) {
             val fileName = rdd.take(1).apply(0)._1
             val the_date = StringUtils.fileName2TheDate(fileName)
-            val path = file_dir + the_date + "/" + fileName + "/"
+            val path = filter_dir + the_date + "/" + fileName + "/"
             rdd.map(ss => ss._2).repartition(1).saveAsTextFile(path)
             val hbases: java.util.List[String] = new util.ArrayList[String]()
             rdd.foreach(ss => {
@@ -154,7 +154,6 @@ object SparkStreaming extends java.io.Serializable {
               HBaseClient.batchAdd(hbases, fileName)
             }
           }
-
         })
       }
     }
