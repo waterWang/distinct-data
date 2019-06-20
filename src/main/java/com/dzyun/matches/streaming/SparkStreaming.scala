@@ -27,7 +27,7 @@ object SparkStreaming extends java.io.Serializable {
   //  private val hdfs_path = YamlUtil.getPatam("hdfsPath")
   val file_dir = "hdfs:///user/tiger/origin_data_files_test/"
   val filter_dir = "hdfs:///user/tiger/filter_files/"
-  val checkpoint_dir = "hdfs:///user/tiger/test" //"file:///home/tiger/distinct-data/data/"
+  val checkpoint_dir = "hdfs:///user/tiger/checkpoint" //"file:///home/tiger/distinct-data/data/"
 
   def createContext(): StreamingContext = {
     val conf = new SparkConf().setAppName("org_txt_distinct").setMaster("yarn")
