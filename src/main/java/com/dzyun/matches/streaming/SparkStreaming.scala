@@ -120,7 +120,7 @@ object SparkStreaming extends java.io.Serializable {
       //        log.warn("===end streaming,cost time is {}s,row cnt is {}", cost / 1000, cnt)
       //      })
 
-      data.filter(ss => { // 满足条件的保留
+      val filterData = data.filter(ss => { // 满足条件的保留
         val row = ss._2
         val arr = row.split(line_regex)
         var isNotExist = false
@@ -135,20 +135,23 @@ object SparkStreaming extends java.io.Serializable {
           }
         }
         isNotExist
-      }).foreachRDD(rdd => {
-        val fileName = rdd.take(1).apply(1)._1
-        val the_date = StringUtils.fileName2TheDate(fileName)
-        val path = file_dir + the_date + "/" + fileName + "/"
-        rdd.map(ss => ss._2).repartition(1).saveAsTextFile(path)
-        val hbases: java.util.List[String] = new util.ArrayList[String]()
-        rdd.foreach(ss => {
-          val row = ss._2
-          val arr = row.split(line_regex)
-          val rowKey = ShaUtils.encrypt(arr(0), arr(1), arr(3), arr(4))
-          hbases.add(rowKey)
-        })
-        HBaseClient.batchAdd(hbases, fileName)
       })
+      if (filterData != null) {
+        filterData.foreachRDD(rdd => {
+          val fileName = rdd.take(1).apply(0)._1
+          val the_date = StringUtils.fileName2TheDate(fileName)
+          val path = file_dir + the_date + "/" + fileName + "/"
+          rdd.map(ss => ss._2).repartition(1).saveAsTextFile(path)
+          val hbases: java.util.List[String] = new util.ArrayList[String]()
+          rdd.foreach(ss => {
+            val row = ss._2
+            val arr = row.split(line_regex)
+            val rowKey = ShaUtils.encrypt(arr(0), arr(1), arr(3), arr(4))
+            hbases.add(rowKey)
+          })
+          HBaseClient.batchAdd(hbases, fileName)
+        })
+      }
     }
     ssc.start()
     ssc.awaitTermination()
