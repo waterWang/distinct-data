@@ -1,10 +1,15 @@
 package com.dzyun.matches.hive;
 
 import com.dzyun.matches.dto.MsgEntity;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import org.apache.hadoop.fs.FSDataOutputStream;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.SparkSession;
@@ -38,6 +43,7 @@ public class HiveClient implements Serializable {
 //    spark.sqlContext().setConf("hive.exec.dynamic.partition.mode", "nonstrict");
     spark.sqlContext().sql("set hive.exec.dynamic.partition=true");
     spark.sqlContext().sql("set hive.exec.dynamic.partition.mode=nonstrict");
+    spark.sqlContext().sparkContext().setLogLevel("warn");
 //    spark.sqlContext().sql("insert overwrite table hive_test.query_result_info  partition(dt) " +
 //        "select query, code, info, $dt " +
 //        "from queryResultTempTable ");
@@ -47,11 +53,38 @@ public class HiveClient implements Serializable {
     log.warn("start insert hive===" + msgs.size());
     Long start = System.currentTimeMillis();
     Dataset<Row> ds = spark.createDataFrame(msgs, MsgEntity.class).toDF(cols);
-    ds.write().mode("append").format("Hive").partitionBy("the_date", "file_no")
+    ds.repartition(1).write().mode("append").format("Hive").partitionBy("the_date", "file_no")
         .saveAsTable(tableName);
     Long cost = (System.currentTimeMillis() - start) / 1000;
     log.warn("===insert hive cnt is {},cost time is {}s", msgs.size(), cost);
   }
+
+
+//  public static void write2hdfs(Object listContent, String filePath) throws IOException {
+//    ObjectMapper objectMapper = new ObjectMapper();
+//    Path path = new Path(filePath);
+//    FileSystem fs = path.getFileSystem(conf);
+//    if (!fs.exists(path)) {
+//      fs.createNewFile(path);
+//    }
+//    FSDataOutputStream output = fs.append(new Path(filePath));
+//    System.out.println(listContent.toString());
+//    output.write(objectMapper.writeValueAsString(listContent).getBytes("UTF-8"));
+//    output.write("\n".getBytes("UTF-8"));//换行
+//    fs.close();
+//    output.close();
+//  }
+
+//  public static void writeHdfs(List<MsgEntity> msgs) {
+//    spark.sqlContext().sparkContext().makeRDD(msgs,1,MsgEntity.class);
+//    log.warn("start insert hive===" + msgs.size());
+//    Long start = System.currentTimeMillis();
+//    Dataset<Row> ds = spark.createDataFrame(msgs, MsgEntity.class).toDF(cols);
+//    ds.write().mode("append").format("Hive").partitionBy("the_date", "file_no")
+//        .saveAsTable(tableName);
+//    Long cost = (System.currentTimeMillis() - start) / 1000;
+//    log.warn("===insert hive cnt is {},cost time is {}s", msgs.size(), cost);
+//  }
 
   public static void main(String[] args) {
     Long len = Long.parseLong(args[0]);
