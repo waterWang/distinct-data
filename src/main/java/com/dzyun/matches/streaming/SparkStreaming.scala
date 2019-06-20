@@ -130,7 +130,7 @@ object SparkStreaming extends java.io.Serializable {
           if (!HBaseClient.existsRowKey(rowKey)) {
             isExist = true
           } else {
-            log.warn("===cannot insert fileName is {},row is {}", fileName, row)
+            //log.warn("===cannot insert fileName is {},row is {}", fileName, row)
           }
         }
         isExist
