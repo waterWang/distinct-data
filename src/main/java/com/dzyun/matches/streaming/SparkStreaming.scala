@@ -3,10 +3,8 @@ package com.dzyun.matches.streaming
 import java.io.File
 import java.util
 
-import com.dzyun.matches.dto.{MsgEntity, RowEntity}
 import com.dzyun.matches.hbase.HBaseClient
-import com.dzyun.matches.hive.HiveClient
-import com.dzyun.matches.util.{DateUtils, ShaUtils, StringUtils}
+import com.dzyun.matches.util.{ShaUtils, StringUtils}
 import org.apache.hadoop.io.{LongWritable, Text}
 import org.apache.hadoop.mapreduce.lib.input.TextInputFormat
 import org.apache.spark.SparkConf
@@ -29,7 +27,6 @@ object SparkStreaming extends java.io.Serializable {
   val file_dir = base_dir + "origin_data_files_test/"
   val filter_dir = base_dir + "filter_files/"
   val checkpoint_dir = base_dir + "checkpoint"
-
   //"file:///home/tiger/distinct-data/data/"
 
   def createContext(): StreamingContext = {
@@ -126,17 +123,18 @@ object SparkStreaming extends java.io.Serializable {
       data.filter(ss => { // 满足条件的保留
         val row = ss._2
         val arr = row.split(line_regex)
-        var isExist = false
+        var isNotExist = false
         if (arr.length >= 5) {
           val rowKey = ShaUtils.encrypt(arr(0), arr(1), arr(3), arr(4))
           if (!HBaseClient.existsRowKey(rowKey)) {
-            isExist = true
+            isNotExist = true
           } else {
-            log.warn("===cannot insert fileName is {},row is {}", ss._1, row)
-            isExist = false
+            //ambiguous reference to overloaded definition
+            //log.warn("===cannot insert fileName is {},row is {}", ss._1, row)
+            System.err.println("===cannot insert fileName is " + ss._1 + ",row is " + row)
           }
         }
-        isExist
+        isNotExist
       }).foreachRDD(rdd => {
         val fileName = rdd.take(1).apply(1)._1
         val the_date = StringUtils.fileName2TheDate(fileName)
