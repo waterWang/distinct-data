@@ -39,10 +39,10 @@ object SparkStreaming extends java.io.Serializable {
   }
 
   def txtFileStream(ssc: StreamingContext, dir: String): DStream[String] =
-    ssc.fileStream[LongWritable, Text, TextInputFormat](dir)
-      .transform(rdd =>
+    ssc.fileStream[LongWritable, Text, TextInputFormat](dir)  // 30s  优化input size/ Records
+      .repartition(1).transform(rdd =>
         new UnionRDD(rdd.context, rdd.dependencies.map(dep =>
-          dep.rdd.asInstanceOf[RDD[(LongWritable, Text)]].map(_._2.toString).setName(dep.rdd.name))
+          dep.rdd.asInstanceOf[RDD[(LongWritable, Text)]].map(_._2.toString).setName(dep.rdd.name))   // 30s
         )
       )
 
