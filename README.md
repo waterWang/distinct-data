@@ -46,3 +46,6 @@ mvn clean assembly:assembly -DskipTests  //打包
 
 set hive.cli.print.header=true;
 set  hive.resultset.use.unique.column.names=false;
+
+
+curl "https://dpapi.yibangcredit.com/receiveserver/api/v1/token?username=tianshang002&password=mreiuyhnlighean7482il"
