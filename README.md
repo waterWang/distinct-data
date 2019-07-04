@@ -49,3 +49,5 @@ set  hive.resultset.use.unique.column.names=false;
 
 
 curl "https://dpapi.yibangcredit.com/receiveserver/api/v1/token?username=tianshang002&password=mreiuyhnlighean7482il"
+
+row_key#!^id#!^isp_code#!^post_code#!^admin_code#!^area_code#!^event_time
